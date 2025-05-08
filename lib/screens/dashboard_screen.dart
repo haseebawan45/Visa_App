@@ -14,6 +14,8 @@ import 'package:visa_app/screens/add_money_screen.dart';
 import 'package:visa_app/screens/send_money_screen.dart';
 import 'package:visa_app/screens/budget_screen.dart';
 import 'package:visa_app/screens/transaction_history_screen.dart';
+import 'package:visa_app/screens/notification_screen.dart';
+import 'package:visa_app/screens/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -216,13 +218,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 _buildActionButton(
                                   icon: Icons.notifications_outlined,
                                   badge: 2,
-                                  onTap: () {},
+                                  onTap: () => _navigateToScreen(const NotificationScreen()),
                                   buttonSize: screenWidth * 0.1,
                                 ),
                                 SizedBox(width: screenWidth * 0.02),
                                 _buildActionButton(
                                   icon: Icons.person_outline,
-                                  onTap: () {},
+                                  onTap: () => _navigateToScreen(const ProfileScreen()),
                                   buttonSize: screenWidth * 0.1,
                                 ),
                               ],
