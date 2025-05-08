@@ -15,6 +15,7 @@ class NeuroCard extends StatelessWidget {
   final BoxShape shape;
   final Gradient? gradient;
   final LinearGradient? highlightGradient;
+  final Color? glow;
 
   const NeuroCard({
     super.key,
@@ -31,6 +32,7 @@ class NeuroCard extends StatelessWidget {
     this.shape = BoxShape.rectangle,
     this.gradient,
     this.highlightGradient,
+    this.glow,
   });
 
   @override
@@ -74,6 +76,13 @@ class NeuroCard extends StatelessWidget {
           borderRadius: borderRadiusObj,
           gradient: gradient,
           boxShadow: [
+            // Glow effect if specified
+            if (glow != null)
+              BoxShadow(
+                color: glow!.withOpacity(0.6),
+                blurRadius: depth * 2.5,
+                spreadRadius: depth * 0.8,
+              ),
             // Distant shadow (bottom-right)
             BoxShadow(
               color: AppTheme.neumorphDarkShadow,

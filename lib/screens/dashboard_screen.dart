@@ -6,6 +6,10 @@ import 'package:visa_app/widgets/balance_card.dart';
 import 'package:visa_app/widgets/glass_container.dart';
 import 'package:visa_app/widgets/neuro_card.dart';
 import 'package:visa_app/widgets/transaction_card.dart';
+import 'package:visa_app/screens/ghost_payment_screen.dart';
+import 'package:visa_app/screens/refund_assistant_screen.dart';
+import 'package:visa_app/screens/group_protection_screen.dart';
+import 'package:visa_app/screens/travel_mode_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   final List<Transaction> _transactions = Transaction.getMockTransactions();
   bool _isBalanceLocked = true;
   bool _showScamAlert = false;
+  bool _isCardFrozen = false;
   late AnimationController _alertController;
   
   @override
@@ -42,9 +47,45 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     super.dispose();
   }
 
+  // Securely toggle the balance visibility
   void _onLockChanged(bool value) {
-    setState(() {
-      _isBalanceLocked = value;
+    // Debug information
+    print("Balance visibility toggle: ${_isBalanceLocked} -> $value");
+    
+    // Ensure we run in the next frame to avoid potential build issues
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _isBalanceLocked = value;
+        });
+        
+        // Show confirmation to user
+        ScaffoldMessenger.of(context).clearSnackBars(); // Clear any existing snackbars
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: value ? AppTheme.primaryNeon : AppTheme.warningNeon,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(AppTheme.spacingM),
+            content: Row(
+              children: [
+                Icon(
+                  value ? Icons.lock_outline : Icons.lock_open_outlined, 
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: AppTheme.spacingS),
+                Expanded(
+                  child: Text(
+                    value ? 'Balance hidden - Secure mode activated' : 'Balance visible - Quick access mode',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     });
   }
 
@@ -52,6 +93,36 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     setState(() {
       _showScamAlert = false;
     });
+  }
+
+  void _toggleCardFreeze() {
+    setState(() {
+      _isCardFrozen = !_isCardFrozen;
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: _isCardFrozen ? AppTheme.dangerNeon : AppTheme.accentNeon,
+        content: Text(
+          _isCardFrozen ? 'Card frozen successfully. Transactions blocked.' : 'Card unfrozen. Transactions enabled.',
+          style: TextStyle(color: Colors.white),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _navigateToScreen(Widget screen) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: AppTheme.animMedium,
+        pageBuilder: (context, animation, secondaryAnimation) => 
+          FadeTransition(
+            opacity: animation,
+            child: screen,
+          ),
+      ),
+    );
   }
 
   @override
@@ -139,16 +210,40 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 
                 const SizedBox(height: AppTheme.spacingS),
                 
-                // Balance Card
-                BalanceCard(
-                  balance: 275850.75,
-                  isLocked: _isBalanceLocked,
-                  onLockChanged: _onLockChanged,
-                  onTap: () {},
-                  expenditurePercentage: 0.65,
-                  gradientColors: const [
-                    AppTheme.primaryNeon,
-                    AppTheme.secondaryNeon,
+                // Balance Card with visibility toggle button
+                Stack(
+                  children: [
+                    BalanceCard(
+                      balance: 275850.75,
+                      isLocked: _isBalanceLocked,
+                      onLockChanged: _onLockChanged,
+                      onTap: () {},
+                      expenditurePercentage: 0.65,
+                      gradientColors: const [
+                        AppTheme.primaryNeon,
+                        AppTheme.secondaryNeon,
+                      ],
+                    ),
+                    
+                    // Visibility toggle button positioned over the card
+                    Positioned(
+                      top: 16,
+                      right: 32,
+                      child: NeuroCard(
+                        width: 48,
+                        height: 48,
+                        borderRadius: AppTheme.radiusRounded,
+                        depth: 3,
+                        padding: const EdgeInsets.all(0),
+                        onTap: () => _onLockChanged(!_isBalanceLocked),
+                        glow: _isBalanceLocked ? AppTheme.warningNeon : AppTheme.primaryNeon,
+                        child: Icon(
+                          _isBalanceLocked ? Icons.visibility : Icons.visibility_off,
+                          color: _isBalanceLocked ? AppTheme.warningNeon : AppTheme.primaryNeon,
+                          size: 24,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 
@@ -176,19 +271,31 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         icon: Icons.flash_on_rounded,
                         label: 'Ghost Pay',
                         color: AppTheme.secondaryNeon,
-                        onTap: () {},
+                        onTap: () => _navigateToScreen(const GhostPaymentScreen()),
                       ),
                       _buildQuickAction(
                         icon: Icons.credit_card_off_rounded,
                         label: 'Freeze Card',
                         color: AppTheme.dangerNeon,
-                        onTap: () {},
+                        onTap: _toggleCardFreeze,
                       ),
                       _buildQuickAction(
                         icon: Icons.group_rounded,
                         label: 'Group Plan',
                         color: AppTheme.warningNeon,
-                        onTap: () {},
+                        onTap: () => _navigateToScreen(const GroupProtectionScreen()),
+                      ),
+                      _buildQuickAction(
+                        icon: Icons.travel_explore,
+                        label: 'Travel Mode',
+                        color: AppTheme.accentNeon,
+                        onTap: () => _navigateToScreen(const TravelModeScreen()),
+                      ),
+                      _buildQuickAction(
+                        icon: Icons.support_agent,
+                        label: 'Refund Help',
+                        color: AppTheme.primaryNeon,
+                        onTap: () => _navigateToScreen(const RefundAssistantScreen()),
                       ),
                     ],
                   ),
@@ -320,6 +427,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     required Color color,
     required VoidCallback onTap,
   }) {
+    // Special case for Freeze Card to show active state
+    final bool isActive = label == 'Freeze Card' && _isCardFrozen;
+    
     return Container(
       margin: const EdgeInsets.only(right: AppTheme.spacingM),
       child: Column(
@@ -331,9 +441,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             depth: 4,
             onTap: onTap,
             padding: const EdgeInsets.all(0),
+            glow: isActive ? color : null,
             child: Icon(
               icon,
-              color: color,
+              color: isActive ? Colors.white : color,
               size: 28,
             ),
           ),
@@ -341,8 +452,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           Text(
             label,
             style: TextStyle(
-              color: AppTheme.textSecondary,
+              color: isActive ? color : AppTheme.textSecondary,
               fontSize: 12,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ],

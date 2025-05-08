@@ -32,6 +32,7 @@ class BalanceCard extends StatefulWidget {
 class _BalanceCardState extends State<BalanceCard> with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   bool _isPressed = false;
+  bool _previousLockState = false; // Track previous state to detect changes
 
   @override
   void initState() {
@@ -41,6 +42,19 @@ class _BalanceCardState extends State<BalanceCard> with SingleTickerProviderStat
       duration: const Duration(milliseconds: 2000),
     );
     _pulseController.repeat(reverse: true);
+    _previousLockState = widget.isLocked;
+  }
+
+  @override
+  void didUpdateWidget(BalanceCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Detect when isLocked state changes
+    if (oldWidget.isLocked != widget.isLocked) {
+      _previousLockState = oldWidget.isLocked;
+      print("BalanceCard: isLocked changed from $_previousLockState to ${widget.isLocked}");
+      // Force rebuild with setState
+      setState(() {});
+    }
   }
 
   @override
@@ -51,6 +65,14 @@ class _BalanceCardState extends State<BalanceCard> with SingleTickerProviderStat
 
   String _formatBalance(double balance) {
     return 'PKR ${balance.toStringAsFixed(2)}';
+  }
+
+  String _getDisplayBalance() {
+    if (widget.isLocked) {
+      return 'PKR *** *** ***';
+    } else {
+      return _formatBalance(widget.balance);
+    }
   }
 
   @override
@@ -151,18 +173,6 @@ class _BalanceCardState extends State<BalanceCard> with SingleTickerProviderStat
                             ),
                           ],
                         ),
-
-                        // Budget lock toggle
-                        FuturisticToggle(
-                          value: widget.isLocked,
-                          onChanged: widget.onLockChanged,
-                          width: 52,
-                          height: 26,
-                          activeColor: AppTheme.primaryNeon,
-                          inactiveColor: AppTheme.warningNeon,
-                          activeText: 'ON',
-                          inactiveText: 'OFF',
-                        ),
                       ],
                     ),
 
@@ -172,14 +182,27 @@ class _BalanceCardState extends State<BalanceCard> with SingleTickerProviderStat
                     AnimatedScale(
                       scale: _isPressed ? 0.98 : 1.0,
                       duration: AppTheme.animFast,
-                      child: Text(
-                        _formatBalance(widget.balance),
-                        style: TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
-                        ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Simple AnimatedSwitcher to handle the transition between visible/hidden balance
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (Widget child, Animation<double> animation) {
+                              return FadeTransition(opacity: animation, child: child);
+                            },
+                            child: Text(
+                              _getDisplayBalance(),
+                              key: ValueKey<bool>(widget.isLocked),
+                              style: TextStyle(
+                                color: AppTheme.textPrimary,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
 
