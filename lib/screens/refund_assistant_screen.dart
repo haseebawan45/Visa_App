@@ -6,6 +6,7 @@ import 'package:visa_app/widgets/futuristic_button.dart';
 import 'package:visa_app/widgets/glass_container.dart';
 import 'package:visa_app/widgets/neuro_card.dart';
 import 'package:visa_app/utils/ai_response_templates.dart';
+import 'dart:math' as math;
 
 class RefundAssistantScreen extends StatefulWidget {
   const RefundAssistantScreen({super.key});
@@ -27,6 +28,11 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
   void initState() {
     super.initState();
     _initializeChat();
+    
+    // Schedule proactive suggestions after a delay
+    Future.delayed(const Duration(seconds: 10), () {
+      _offerProactiveSuggestion();
+    });
   }
 
   @override
@@ -133,9 +139,25 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
         _conversationContext["user_intent"] = detectedIntent;
       }
       
+      // Track conversation history
+      if (!_conversationContext.containsKey("history")) {
+        _conversationContext["history"] = <String>[];
+      }
+      (_conversationContext["history"] as List<String>).add(userMessage);
+      
+      // Check for interruption pattern - user wants to do something else
+      if (_isInterruptionRequest(userMessage) && stage != "welcome") {
+        _handleInterruption(userMessage);
+        return;
+      }
+      
       // Handle based on current stage and intent
       if (stage == "welcome") {
-        _handleWelcomeStageResponse(userMessage, detectedIntent);
+        if (detectedIntent == "greeting") {
+          _handleGreeting();
+        } else {
+          _handleWelcomeStageResponse(userMessage, detectedIntent);
+        }
       } else if (stage == "refund_request") {
         _handleRefundRequestResponse(userMessage);
       } else if (stage == "transaction_selection") {
@@ -161,25 +183,178 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
     });
   }
 
-  String _detectIntent(String message) {
-    if (message.contains('refund')) return "refund";
-    if (message.contains('dispute')) return "dispute";
-    if (message.contains('track') || message.contains('status')) return "track";
-    if (message.contains('contact') || message.contains('merchant')) return "contact";
-    if (message.contains('cancel')) return "cancel";
+  bool _isInterruptionRequest(String message) {
+    // Detect if the user is trying to change topics or start over
+    List<String> interruptionPhrases = [
+      'start over', 'cancel', 'stop', 'go back', 'something else',
+      'different', 'change topic', 'nevermind', 'never mind'
+    ];
     
-    // For dates
-    if (message.contains('today') || message.contains('yesterday') || 
-        message.contains('last week')) return "date_selection";
-        
-    // For transaction amounts
-    if (message.contains('₨') || message.contains('rs') || 
-        RegExp(r'\d+').hasMatch(message)) return "transaction_mention";
-        
-    return "unknown";
+    for (String phrase in interruptionPhrases) {
+      if (message.toLowerCase().contains(phrase)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  void _handleInterruption(String message) {
+    // First acknowledge the interruption
+    _addMessage(
+      "I understand you want to switch topics. What would you like to do instead?",
+      ChatMessageType.assistant,
+      suggestions: [
+        "Request a refund",
+        "Track my refund status",
+        "Dispute a transaction",
+        "Contact merchant",
+        "Start over"
+      ],
+    );
+    
+    // Reset the conversation context but keep user data
+    var savedData = <String, dynamic>{};
+    if (_conversationContext.containsKey("user_name")) {
+      savedData["user_name"] = _conversationContext["user_name"];
+    }
+    if (_conversationContext.containsKey("history")) {
+      savedData["history"] = _conversationContext["history"];
+    }
+    
+    _conversationContext.clear();
+    _conversationContext.addAll(savedData);
+    _conversationContext["stage"] = "welcome";
+    _conversationContext["user_intent"] = null;
+  }
+
+  void _handleGreeting() {
+    // Check if this is the first interaction
+    bool isFirstInteraction = !_conversationContext.containsKey("greeting_count");
+    
+    if (isFirstInteraction) {
+      _conversationContext["greeting_count"] = 1;
+      _addMessage(
+        "Hello! It's nice to meet you. I'm your Refund Assistant. How can I help you today?",
+        ChatMessageType.assistant,
+        suggestions: [
+          "Request a refund",
+          "Track my refund status",
+          "Dispute a transaction",
+          "Contact merchant"
+        ],
+      );
+    } else {
+      // Increment greeting count
+      _conversationContext["greeting_count"] = (_conversationContext["greeting_count"] as int) + 1;
+      
+      if ((_conversationContext["greeting_count"] as int) > 2) {
+        // User has greeted multiple times, might be confused
+        _addMessage(
+          "Hi there! It seems we're having a bit of a loop with greetings. What can I actually help you with today?",
+          ChatMessageType.assistant,
+          suggestions: [
+            "Request a refund",
+            "Track my refund status",
+            "Dispute a transaction",
+            "Contact merchant",
+            "I'm just testing"
+          ],
+        );
+      } else {
+        _addMessage(
+          "Hello again! What can I help you with?",
+          ChatMessageType.assistant,
+          suggestions: [
+            "Request a refund",
+            "Track my refund status",
+            "Dispute a transaction",
+            "Contact merchant"
+          ],
+        );
+      }
+    }
   }
 
   void _handleWelcomeStageResponse(String userMessage, String intent) {
+    // Check if we found any extracted entities to personalize the response
+    String extractedMerchant = _conversationContext["extracted_merchant"] as String? ?? "";
+    String extractedAmount = _conversationContext["extracted_amount"] as String? ?? "";
+    String extractedDate = _conversationContext["extracted_date"] as String? ?? "";
+    
+    // If we have extracted information and intent is refund, use it to personalize the response
+    if (intent == "refund" && (extractedMerchant.isNotEmpty || extractedAmount.isNotEmpty)) {
+      String personalizedResponse = "I understand you want to request a refund";
+      
+      if (extractedMerchant.isNotEmpty) {
+        personalizedResponse += " for a purchase from $extractedMerchant";
+      }
+      
+      if (extractedAmount.isNotEmpty) {
+        personalizedResponse += " for ₨$extractedAmount";
+      }
+      
+      if (extractedDate.isNotEmpty) {
+        personalizedResponse += " made on $extractedDate";
+      }
+      
+      personalizedResponse += ". I'll help you with that.";
+      
+      _addMessage(
+        personalizedResponse,
+        ChatMessageType.assistant,
+      );
+      
+      // Pre-fill the transaction information
+      if (extractedMerchant.isNotEmpty) {
+        _conversationContext["selected_transaction"] = extractedMerchant + 
+            (extractedAmount.isNotEmpty ? " - ₨$extractedAmount" : "");
+        
+        // Move directly to reason selection
+        Future.delayed(const Duration(milliseconds: 800), () {
+          _addMessageFromTemplate(AIResponseTemplates.refundTemplates['refund_reason']);
+          _conversationContext["stage"] = "refund_reason";
+        });
+        return;
+      }
+    }
+    
+    // For any sentiment-aware response
+    double sentiment = _conversationContext["sentiment"] as double? ?? 0.0;
+    bool isNegativeSentiment = sentiment < -0.3;
+    
+    if (isNegativeSentiment) {
+      _addMessage(
+        "I'm sorry to hear you're having trouble. I'll do my best to help resolve this for you quickly.",
+        ChatMessageType.assistant,
+      );
+      
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (intent == "refund") {
+          _startRefundFlow();
+        } else if (intent == "dispute") {
+          _startDisputeFlow();
+        } else if (intent == "track") {
+          _showRefundStatus();
+        } else if (intent == "contact") {
+          _showMerchantContactOptions();
+        } else {
+          _addMessage(
+            "Could you please let me know what specific help you need? I can assist with refunds, disputes, tracking status, or contacting merchants.",
+            ChatMessageType.assistant,
+            suggestions: [
+              "Request a refund",
+              "Track my refund status",
+              "Dispute a transaction",
+              "Contact merchant"
+            ],
+          );
+        }
+      });
+      return;
+    }
+    
+    // Default handling based on intent
     if (intent == "refund") {
       _startRefundFlow();
     } else if (intent == "dispute") {
@@ -188,10 +363,12 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       _showRefundStatus();
     } else if (intent == "contact") {
       _showMerchantContactOptions();
+    } else if (intent == "help") {
+      _showHelpOptions();
     } else {
-        _addMessage(
+      _addMessage(
         "I'll be happy to assist you with that. What would you like to do?",
-          ChatMessageType.assistant,
+        ChatMessageType.assistant,
         suggestions: [
           "Request a refund",
           "Track my refund status",
@@ -200,6 +377,193 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
         ],
       );
     }
+  }
+
+  void _showHelpOptions() {
+    _addMessage(
+      "I'm here to help! Here are the main things I can assist you with:",
+      ChatMessageType.assistant,
+    );
+    
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _addMessage(
+        "• Request a refund for a purchase\n• Track the status of existing refunds\n• Dispute a transaction you don't recognize\n• Get contact information for merchants\n\nWhat would you like help with today?",
+        ChatMessageType.assistant,
+        suggestions: [
+          "Request a refund",
+          "Track my refund status",
+          "Dispute a transaction",
+          "Contact merchant",
+          "How does the refund process work?"
+        ],
+        actions: [
+          ChatAction(
+            label: "View tutorial",
+            actionType: "view_tutorial",
+            parameters: {"topic": "refunds"},
+          ),
+        ],
+      );
+    });
+  }
+
+  // Additional method for handling tutorial requests
+  void _showTutorial(String topic) {
+    if (topic == "refunds") {
+      _addMessage(
+        "Refund Process Tutorial",
+        ChatMessageType.assistant,
+      );
+      
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _addMessage(
+          "The refund process works in 4 simple steps:\n\n1️⃣ Request: You provide transaction details and reason\n2️⃣ Submission: We send the request to the merchant\n3️⃣ Processing: The merchant reviews your request (typically 3-5 business days)\n4️⃣ Resolution: Approved refunds are credited back to your original payment method\n\nWould you like to start a refund request now?",
+          ChatMessageType.assistant,
+          suggestions: [
+            "Yes, request a refund",
+            "No, maybe later",
+            "Show me another tutorial"
+          ],
+        );
+      });
+    } else if (topic == "disputes") {
+      // Add dispute tutorial content...
+    }
+  }
+
+  String _detectIntent(String message) {
+    // More sophisticated intent detection with confidence scores
+    Map<String, double> intentScores = {
+      "refund": 0.0,
+      "dispute": 0.0,
+      "track": 0.0,
+      "contact": 0.0,
+      "cancel": 0.0,
+      "help": 0.0,
+      "greeting": 0.0,
+      "date_selection": 0.0,
+      "transaction_mention": 0.0,
+    };
+    
+    // Check for refund intent
+    if (message.contains('refund') || message.contains('money back') || 
+        message.contains('return') || message.contains('get back')) {
+      intentScores["refund"] = (intentScores["refund"] ?? 0.0) + 0.8;
+    }
+    
+    // Check for dispute intent
+    if (message.contains('dispute') || message.contains('contest') || 
+        message.contains('challenge') || message.contains('wrong charge')) {
+      intentScores["dispute"] = (intentScores["dispute"] ?? 0.0) + 0.8;
+    }
+    
+    // Check for tracking intent
+    if (message.contains('track') || message.contains('status') || 
+        message.contains('where is') || message.contains('progress')) {
+      intentScores["track"] = (intentScores["track"] ?? 0.0) + 0.8;
+    }
+    
+    // Check for contact intent
+    if (message.contains('contact') || message.contains('merchant') || 
+        message.contains('speak') || message.contains('call') || 
+        message.contains('email')) {
+      intentScores["contact"] = (intentScores["contact"] ?? 0.0) + 0.7;
+    }
+    
+    // Check for cancellation intent
+    if (message.contains('cancel') || message.contains('stop') || 
+        message.contains('end') || message.contains('don\'t want')) {
+      intentScores["cancel"] = (intentScores["cancel"] ?? 0.0) + 0.8;
+    }
+    
+    // Check for help intent
+    if (message.contains('help') || message.contains('confused') || 
+        message.contains('don\'t understand') || message.contains('how do i')) {
+      intentScores["help"] = (intentScores["help"] ?? 0.0) + 0.7;
+    }
+    
+    // Check for greeting intent
+    if (message.contains('hello') || message.contains('hi ') || 
+        message.contains('hey') || message.contains('greetings')) {
+      intentScores["greeting"] = (intentScores["greeting"] ?? 0.0) + 0.6;
+    }
+    
+    // Check for date selection
+    if (message.contains('today') || message.contains('yesterday') || 
+        message.contains('last week') || message.contains('on ')) {
+      intentScores["date_selection"] = (intentScores["date_selection"] ?? 0.0) + 0.6;
+    }
+    
+    // Check for transaction mentions
+    RegExp amountPattern = RegExp(r'(?:Rs|₨|rs|\$)?\s?(\d+(?:[,.]\d+)?)');
+    RegExp datePattern = RegExp(r'\d{1,2}(?:st|nd|rd|th)? (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December)|\d{1,2}[\/\-\.]\d{1,2}(?:[\/\-\.]\d{2,4})?');
+    
+    if (amountPattern.hasMatch(message)) {
+      intentScores["transaction_mention"] = (intentScores["transaction_mention"] ?? 0.0) + 0.7;
+      
+      // Extract amount for future use
+      final amountMatch = amountPattern.firstMatch(message);
+      if (amountMatch != null) {
+        _conversationContext["extracted_amount"] = amountMatch.group(1);
+      }
+    }
+    
+    if (datePattern.hasMatch(message)) {
+      intentScores["date_selection"] = (intentScores["date_selection"] ?? 0.0) + 0.7;
+      
+      // Extract date for future use
+      final dateMatch = datePattern.firstMatch(message);
+      if (dateMatch != null) {
+        _conversationContext["extracted_date"] = dateMatch.group(0);
+      }
+    }
+    
+    // Extract merchant name if mentioned
+    List<String> knownMerchants = [
+      "coffee shop", "online store", "grocery store", "restaurant", 
+      "gas station", "department store", "electronics store"
+    ];
+    
+    for (String merchant in knownMerchants) {
+      if (message.toLowerCase().contains(merchant)) {
+        _conversationContext["extracted_merchant"] = merchant;
+        intentScores["transaction_mention"] = (intentScores["transaction_mention"] ?? 0.0) + 0.6;
+        break;
+      }
+    }
+    
+    // Detect sentiment
+    double sentimentScore = 0.0;
+    List<String> positiveWords = ['good', 'great', 'excellent', 'thanks', 'happy', 'appreciate', 'helpful'];
+    List<String> negativeWords = ['bad', 'terrible', 'unhappy', 'disappointed', 'angry', 'frustrated', 'poor'];
+    
+    for (String word in positiveWords) {
+      if (message.toLowerCase().contains(word)) sentimentScore += 0.2;
+    }
+    
+    for (String word in negativeWords) {
+      if (message.toLowerCase().contains(word)) sentimentScore -= 0.2;
+    }
+    
+    // Clamp sentiment between -1 and 1
+    sentimentScore = math.max(-1.0, math.min(1.0, sentimentScore));
+    _conversationContext["sentiment"] = sentimentScore;
+    
+    // Find the intent with the highest score
+    String topIntent = "unknown";
+    double maxScore = 0.2; // Threshold for intent detection
+    
+    intentScores.forEach((intent, score) {
+      if (score > maxScore) {
+        maxScore = score;
+        topIntent = intent;
+      }
+    });
+    
+    // Store confidence for future reference
+    _conversationContext["intent_confidence"] = maxScore;
+    
+    return topIntent;
   }
 
   void _startRefundFlow() {
@@ -355,8 +719,124 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
     }
   }
 
+  void _offerProactiveSuggestion() {
+    // Only show proactive suggestions if:
+    // 1. User is not actively typing
+    // 2. The conversation has been idle for a while
+    // 3. We have at least a basic conversation history
+    
+    if (_isTyping || !mounted) return;
+    
+    // Initialize history if needed
+    if (!_conversationContext.containsKey("history")) {
+      _conversationContext["history"] = <String>[];
+    }
+    
+    // Only proceed if we have at least one user message
+    final List<String> history = _conversationContext["history"] as List<String>? ?? <String>[];
+    if (history.isEmpty) {
+      return;
+    }
+    
+    // Get the most recent user intent
+    final userIntent = _conversationContext["user_intent"] as String? ?? "unknown";
+    
+    // Check the stage - only show proactive suggestions on welcome screen
+    // or if no activity for a while (simulated here)
+    final stage = _conversationContext["stage"] as String? ?? "welcome";
+    
+    if (stage != "welcome") return;
+    
+    if (userIntent == "refund" || userIntent == "unknown") {
+      // Show recent transactions that might need a refund
+      _addMessage(
+        "I noticed you might be interested in managing refunds. Would you like to see your recent transactions?",
+        ChatMessageType.assistant,
+        suggestions: [
+          "Yes, show recent transactions",
+          "No thanks",
+          "I need something else"
+        ],
+        actions: [
+          ChatAction(
+            label: "View recent transactions",
+            actionType: "view_transactions",
+            parameters: {"days": 7},
+          ),
+        ],
+      );
+    } else if (userIntent == "track") {
+      // Suggest to check status of a pending refund
+      _addMessage(
+        "You have a pending refund for Coffee Shop (₨1,250). Would you like to check its status?",
+        ChatMessageType.assistant,
+        suggestions: [
+          "Check refund status",
+          "No, not now",
+          "I need help with something else"
+        ],
+        actions: [
+          ChatAction(
+            label: "View refund status",
+            actionType: "view_refund_status",
+            parameters: {"ref_id": "REF12345"},
+          ),
+        ],
+      );
+    } else if (userIntent == "dispute") {
+      // Suggest help with a suspicious transaction
+      _addMessage(
+        "I noticed that you're concerned about a transaction. Would you like to learn more about the dispute process?",
+        ChatMessageType.assistant,
+        suggestions: [
+          "Yes, explain the process",
+          "Start a dispute",
+          "Not interested"
+        ],
+        actions: [
+          ChatAction(
+            label: "View dispute tutorial",
+            actionType: "view_tutorial",
+            parameters: {"topic": "disputes"},
+          ),
+        ],
+      );
+    }
+    
+    // Schedule the next proactive suggestion
+    Future.delayed(const Duration(seconds: 60), () {
+      _offerProactiveSuggestion();
+    });
+  }
+
+  // Add contextual awareness to suggestion handling
   void _handleSuggestionTap(String suggestion) {
     _addMessage(suggestion, ChatMessageType.user);
+
+    // Update conversation analysis metrics
+    if (!_conversationContext.containsKey("suggestion_taps")) {
+      _conversationContext["suggestion_taps"] = 0;
+    }
+    _conversationContext["suggestion_taps"] = (_conversationContext["suggestion_taps"] as int) + 1;
+    
+    // Initialize history if it doesn't exist
+    if (!_conversationContext.containsKey("history")) {
+      _conversationContext["history"] = <String>[];
+    }
+    
+    // Check if user always uses suggestions instead of typing - safely access history
+    final List<String> history = _conversationContext["history"] as List<String>? ?? <String>[];
+    
+    // Only calculate ratio if we have history
+    if (history.isNotEmpty) {
+      final totalMessages = history.length;
+      final suggestionRatio = (_conversationContext["suggestion_taps"] as int) / totalMessages;
+      
+      // If user seems to prefer suggestions, offer more of them in future messages
+      if (suggestionRatio > 0.8 && totalMessages > 3) {
+        _conversationContext["prefers_suggestions"] = true;
+      }
+    }
 
     // Simulate assistant typing
     setState(() {
@@ -370,11 +850,12 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       setState(() {
         _isTyping = false;
       });
-
+      
+      // Existing code for handling suggestions...
       final stage = _conversationContext["stage"];
       
       if (stage == "welcome") {
-      if (suggestion == "Request a refund") {
+        if (suggestion == "Request a refund") {
           _startRefundFlow();
         } else if (suggestion == "Track my refund status") {
           _showRefundStatus();
@@ -382,6 +863,12 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
           _startDisputeFlow();
         } else if (suggestion == "Contact merchant") {
           _showMerchantContactOptions();
+        } else if (suggestion == "Yes, show recent transactions") {
+          _showRecentTransactions();
+        } else if (suggestion == "Check refund status") {
+          _showRefundStatusVisual("REF12345");
+        } else if (suggestion == "Yes, explain the process") {
+          _showTutorial("disputes");
         }
       } else if (stage == "transaction_selection") {
         _handleTransactionSelectionResponse(suggestion);
@@ -392,7 +879,7 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       } else if (stage == "refund_status") {
         if (suggestion.contains("Details on")) {
           String merchant = suggestion.replaceAll("Details on ", "").replaceAll(" refund", "");
-        _addMessage(
+          _addMessage(
             "Here are the details for your $merchant refund request:\n\n" +
             "• Reference: REF" + (merchant == "Coffee Shop" ? "12345" : "67890") + "\n" +
             "• Amount: ₨" + (merchant == "Coffee Shop" ? "1,250" : "5,890") + "\n" +
@@ -400,7 +887,7 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
             "• Status: " + (merchant == "Coffee Shop" ? "In Progress" : "Completed") + "\n" +
             "• " + (merchant == "Coffee Shop" ? "Expected completion: 3-5 business days" : "Refunded on: June 8, 2023") + "\n\n" +
             "Would you like to take any action?",
-          ChatMessageType.assistant,
+            ChatMessageType.assistant,
             suggestions: merchant == "Coffee Shop" ? [
               "Cancel request",
               "Update request details",
@@ -412,7 +899,7 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
             ],
           );
         } else if (suggestion == "I have another question") {
-        _addMessage(
+          _addMessage(
             "What would you like to know?",
             ChatMessageType.assistant,
             suggestions: [
@@ -426,10 +913,10 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
         }
       } else if (stage == "merchant_contact") {
         if (suggestion == "Other merchant") {
-        _addMessage(
+          _addMessage(
             "Please type the name of the merchant you wish to contact:",
-          ChatMessageType.assistant,
-        );
+            ChatMessageType.assistant,
+          );
         } else {
           _addMessage(
             "Here's the contact information for $suggestion:\n\n" +
@@ -1008,6 +1495,8 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       return _buildRefundsList(message);
     } else if (message.data!.containsKey("dispute_eligible_transactions")) {
       return _buildTransactionsList(message);
+    } else if (message.data!.containsKey("refund_status_visual")) {
+      return _buildRefundStatusVisual(message.data!["refund_status_visual"]);
     }
     
     // Default fallback
@@ -1409,6 +1898,12 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
     } else if (action.actionType == "add_contact") {
       final name = action.parameters?["name"] ?? "Merchant";
       _showAddContactConfirmation(name);
+    } else if (action.actionType == "view_tutorial") {
+      final topic = action.parameters?["topic"] ?? "refunds";
+      _showTutorial(topic);
+    } else if (action.actionType == "view_refund_status") {
+      final refId = action.parameters?["ref_id"] ?? "REF12345";
+      _showRefundStatusVisual(refId);
     }
   }
   
@@ -1534,6 +2029,297 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       "$name has been added to your saved merchants. You can access their contact information at any time from your profile.",
       ChatMessageType.assistant,
     );
+  }
+  
+  void _showRefundStatusVisual(String refId) {
+    // First, show a loading message
+    _addMessage(
+      "Loading status details for refund #$refId...",
+      ChatMessageType.assistant,
+    );
+    
+    // Simulate a delay to fetch status
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      // Create a structured data representation of the refund status
+      final Map<String, dynamic> refundData = {
+        "refund_id": refId,
+        "merchant": "Coffee Shop",
+        "amount": 1250,
+        "date_requested": "June 10, 2023",
+        "status": "In Progress",
+        "timeline": [
+          {
+            "stage": "Refund Requested",
+            "date": "June 10, 2023",
+            "completed": true,
+          },
+          {
+            "stage": "Merchant Notified",
+            "date": "June 10, 2023",
+            "completed": true,
+          },
+          {
+            "stage": "Merchant Review",
+            "date": "Expected by June 15, 2023",
+            "completed": false,
+          },
+          {
+            "stage": "Refund Approved",
+            "date": "Pending",
+            "completed": false,
+          },
+          {
+            "stage": "Funds Credited",
+            "date": "Expected by June 17, 2023",
+            "completed": false,
+          }
+        ]
+      };
+      
+      _addMessage(
+        "Visual Status for Refund #$refId",
+        ChatMessageType.structured,
+        data: {
+          "refund_status_visual": refundData
+        },
+      );
+    });
+  }
+
+  // Method to build visual refund status timeline
+  Widget _buildRefundStatusVisual(Map<String, dynamic> refundData) {
+    final timeline = refundData["timeline"] as List;
+    
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(
+          top: AppTheme.spacingM,
+          bottom: AppTheme.spacingM,
+        ),
+        child: GlassContainer(
+          padding: const EdgeInsets.all(AppTheme.spacingM),
+          borderRadius: 20,
+          opacity: AppTheme.glassOpacityMedium,
+          blur: AppTheme.blurLight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Refund header
+              Row(
+                children: [
+                  Icon(
+                    Icons.account_balance_wallet_rounded,
+                    color: AppTheme.accentNeon,
+                    size: 22,
+                  ),
+                  const SizedBox(width: AppTheme.spacingS),
+                  Text(
+                    "${refundData["merchant"]} - ₨${refundData["amount"]}",
+                    style: TextStyle(
+                      color: AppTheme.accentNeon,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              
+              // Refund status badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingM,
+                  vertical: AppTheme.spacingXS,
+                ),
+                decoration: BoxDecoration(
+                  color: refundData["status"] == "Completed" 
+                      ? Colors.green.withOpacity(0.2)
+                      : AppTheme.accentNeon.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  border: Border.all(
+                    color: refundData["status"] == "Completed"
+                        ? Colors.green
+                        : AppTheme.accentNeon,
+                  ),
+                ),
+                child: Text(
+                  refundData["status"],
+                  style: TextStyle(
+                    color: refundData["status"] == "Completed"
+                        ? Colors.green
+                        : AppTheme.accentNeon,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingL),
+              
+              // Timeline visualization
+              ..._buildTimelineItems(timeline),
+              
+              const SizedBox(height: AppTheme.spacingM),
+              
+              // Action buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  NeuroCard(
+                    onTap: () {},
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacingM,
+                      vertical: AppTheme.spacingS,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.email_outlined,
+                          color: AppTheme.primaryNeon,
+                          size: 16,
+                        ),
+                        const SizedBox(width: AppTheme.spacingXS),
+                        Text(
+                          "Email updates",
+                          style: TextStyle(
+                            color: AppTheme.primaryNeon,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  NeuroCard(
+                    onTap: () {},
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacingM,
+                      vertical: AppTheme.spacingS,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.phone_outlined,
+                          color: AppTheme.accentNeon,
+                          size: 16,
+                        ),
+                        const SizedBox(width: AppTheme.spacingXS),
+                        Text(
+                          "Contact support",
+                          style: TextStyle(
+                            color: AppTheme.accentNeon,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      )
+          .animate()
+          .fadeIn(duration: 500.ms)
+          .slide(begin: const Offset(0, 0.2), end: Offset.zero, duration: 500.ms),
+    );
+  }
+
+  List<Widget> _buildTimelineItems(List timeline) {
+    List<Widget> timelineWidgets = [];
+    
+    for (int i = 0; i < timeline.length; i++) {
+      final item = timeline[i];
+      final bool isCompleted = item["completed"] as bool;
+      final bool isLast = i == timeline.length - 1;
+      
+      // The timeline item itself
+      timelineWidgets.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Status indicator circle
+            Container(
+              width: 20,
+              height: 20,
+              margin: const EdgeInsets.only(
+                right: AppTheme.spacingM,
+                top: 2,
+              ),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isCompleted 
+                    ? Colors.green 
+                    : AppTheme.backgroundLighter,
+                border: Border.all(
+                  color: isCompleted 
+                      ? Colors.green 
+                      : AppTheme.primaryNeon.withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+              child: isCompleted 
+                  ? const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 12,
+                    )
+                  : null,
+            ),
+            
+            // Timeline text content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item["stage"],
+                    style: TextStyle(
+                      color: isCompleted 
+                          ? Colors.green 
+                          : AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item["date"],
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ).animate().fadeIn(
+          delay: Duration(milliseconds: 300 * i),
+          duration: 400.ms,
+        ),
+      );
+      
+      // Connecting line (except for last item)
+      if (!isLast) {
+        timelineWidgets.add(
+          Container(
+            margin: const EdgeInsets.only(left: 9),
+            width: 2,
+            height: 30,
+            color: isCompleted 
+                ? Colors.green 
+                : AppTheme.primaryNeon.withOpacity(0.3),
+          ).animate().fadeIn(
+            delay: Duration(milliseconds: 300 * i + 200),
+            duration: 400.ms,
+          ),
+        );
+      }
+    }
+    
+    return timelineWidgets;
   }
   
   IconData _getIconForAction(String actionType) {
