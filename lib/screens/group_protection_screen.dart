@@ -114,327 +114,386 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions for responsive sizing
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
+    
+    // Calculate responsive dimensions
+    final double buttonSize = screenWidth * 0.11;
+    final double iconSize = screenWidth * 0.05;
+    final double smallIconSize = screenWidth * 0.035;
+    final double padding = screenWidth * 0.04;
+    final double smallPadding = screenWidth * 0.02;
+    final double titleFontSize = screenWidth * 0.055;
+    final double subtitleFontSize = screenWidth * 0.045;
+    final double bodyFontSize = screenWidth * 0.038;
+    final double smallFontSize = screenWidth * 0.03;
+    
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                colors: [
-                  AppTheme.background,
-                  AppTheme.backgroundDarker,
-                  const Color(0xFF132136),
-                ],
-              ),
-            ),
-          ),
-          
-          // Decorative elements
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTheme.warningNeon.withOpacity(0.1),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          Positioned(
-            bottom: -80,
-            right: -80,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTheme.accentNeon.withOpacity(0.15),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          // Main content
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // App bar
-                Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: NeuroCard(
-                          width: 45,
-                          height: 45,
-                          borderRadius: AppTheme.radiusRounded,
-                          depth: 3,
-                          padding: const EdgeInsets.all(0),
-                          child: const Icon(
-                            Icons.arrow_back_rounded,
-                            color: AppTheme.textSecondary,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppTheme.spacingM),
-                      Text(
-                        'Group Protection',
-                        style: TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: _toggleEditing,
-                        child: NeuroCard(
-                          width: 45,
-                          height: 45,
-                          borderRadius: AppTheme.radiusRounded,
-                          depth: 3,
-                          padding: const EdgeInsets.all(0),
-                          child: Icon(
-                            _isEditing ? Icons.close : Icons.edit,
-                            color: AppTheme.textSecondary,
-                            size: 20,
-                          ),
-                        ),
-                      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              // Background gradient
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      AppTheme.background,
+                      AppTheme.backgroundDarker,
+                      const Color(0xFF132136),
                     ],
                   ),
                 ),
-                
-                // Group Protection Status Card
-                AnimatedBuilder(
-                  animation: _pulseController,
-                  builder: (context, child) {
-                    return GlassContainer(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.spacingM,
-                        vertical: AppTheme.spacingM,
-                      ),
-                      borderRadius: AppTheme.radiusLarge,
-                      opacity: AppTheme.glassOpacityMedium,
-                      blur: AppTheme.blurStrong,
-                      border: Border.all(
-                        color: _isProtectionActive
-                            ? AppTheme.primaryNeon.withOpacity(0.3 + 0.1 * _pulseController.value)
-                            : AppTheme.backgroundLighter.withOpacity(0.2),
-                        width: 1.5,
-                      ),
-                      child: Column(
+              ),
+              
+              // Decorative elements
+              Positioned(
+                top: -screenHeight * 0.12,
+                left: -screenWidth * 0.25,
+                child: Container(
+                  width: screenWidth * 0.5,
+                  height: screenWidth * 0.5,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        AppTheme.warningNeon.withOpacity(0.1),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              
+              Positioned(
+                bottom: -screenHeight * 0.1,
+                right: -screenWidth * 0.2,
+                child: Container(
+                  width: screenWidth * 0.5,
+                  height: screenWidth * 0.5,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        AppTheme.accentNeon.withOpacity(0.15),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Main content
+              SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // App bar
+                    Padding(
+                      padding: EdgeInsets.all(padding),
+                      child: Row(
                         children: [
-                          // Status header
-                          Padding(
-                            padding: const EdgeInsets.all(AppTheme.spacingM),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: _isProtectionActive
-                                        ? AppTheme.primaryNeon.withOpacity(0.1 + 0.05 * _pulseController.value)
-                                        : AppTheme.backgroundLighter.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                    boxShadow: _isProtectionActive
-                                        ? [
-                                            BoxShadow(
-                                              color: AppTheme.primaryNeon.withOpacity(0.2 + 0.1 * _pulseController.value),
-                                              blurRadius: 10,
-                                              spreadRadius: 2 * _pulseController.value,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: Icon(
-                                    Icons.shield,
-                                    color: _isProtectionActive
-                                        ? AppTheme.primaryNeon
-                                        : AppTheme.textMuted,
-                                    size: 28,
-                                  ),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: NeuroCard(
+                              width: buttonSize,
+                              height: buttonSize,
+                              borderRadius: AppTheme.radiusRounded,
+                              depth: 3,
+                              padding: const EdgeInsets.all(0),
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: AppTheme.textSecondary,
+                                size: iconSize,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: padding),
+                          Expanded(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Group Protection',
+                                style: TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontSize: titleFontSize,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                const SizedBox(width: AppTheme.spacingM),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _toggleEditing,
+                            child: NeuroCard(
+                              width: buttonSize,
+                              height: buttonSize,
+                              borderRadius: AppTheme.radiusRounded,
+                              depth: 3,
+                              padding: const EdgeInsets.all(0),
+                              child: Icon(
+                                _isEditing ? Icons.close : Icons.edit,
+                                color: AppTheme.textSecondary,
+                                size: iconSize,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Group Protection Status Card
+                    AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, child) {
+                        return GlassContainer(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: padding,
+                            vertical: smallPadding,
+                          ),
+                          borderRadius: AppTheme.radiusLarge,
+                          opacity: AppTheme.glassOpacityMedium,
+                          blur: AppTheme.blurStrong,
+                          border: Border.all(
+                            color: _isProtectionActive
+                                ? AppTheme.primaryNeon.withOpacity(0.3 + 0.1 * _pulseController.value)
+                                : AppTheme.backgroundLighter.withOpacity(0.2),
+                            width: 1.5,
+                          ),
+                          child: Column(
+                            children: [
+                              // Status header
+                              Padding(
+                                padding: EdgeInsets.all(padding),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      _isProtectionActive
-                                          ? 'Protection Active'
-                                          : 'Protection Inactive',
-                                      style: TextStyle(
+                                    Container(
+                                      width: buttonSize * 1.1,
+                                      height: buttonSize * 1.1,
+                                      decoration: BoxDecoration(
+                                        color: _isProtectionActive
+                                            ? AppTheme.primaryNeon.withOpacity(0.1 + 0.05 * _pulseController.value)
+                                            : AppTheme.backgroundLighter.withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                        boxShadow: _isProtectionActive
+                                            ? [
+                                                BoxShadow(
+                                                  color: AppTheme.primaryNeon.withOpacity(0.2 + 0.1 * _pulseController.value),
+                                                  blurRadius: 10,
+                                                  spreadRadius: 2 * _pulseController.value,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                      child: Icon(
+                                        Icons.shield,
                                         color: _isProtectionActive
                                             ? AppTheme.primaryNeon
                                             : AppTheme.textMuted,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                                        size: iconSize * 1.2,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _isProtectionActive
-                                          ? 'Your group is protected against fraud'
-                                          : 'Your group is not protected',
-                                      style: TextStyle(
-                                        color: AppTheme.textSecondary,
-                                        fontSize: 14,
+                                    SizedBox(width: padding),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              _isProtectionActive
+                                                  ? 'Protection Active'
+                                                  : 'Protection Inactive',
+                                              style: TextStyle(
+                                                color: _isProtectionActive
+                                                    ? AppTheme.primaryNeon
+                                                    : AppTheme.textMuted,
+                                                fontSize: subtitleFontSize,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(height: smallPadding * 0.5),
+                                          Text(
+                                            _isProtectionActive
+                                                ? 'Your group is protected against fraud'
+                                                : 'Your group is not protected',
+                                            style: TextStyle(
+                                              color: AppTheme.textSecondary,
+                                              fontSize: smallFontSize,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 2,
+                                          ),
+                                        ],
                                       ),
+                                    ),
+                                    SizedBox(width: smallPadding),
+                                    Switch(
+                                      value: _isProtectionActive,
+                                      onChanged: (value) => _toggleProtection(),
+                                      activeColor: AppTheme.primaryNeon,
+                                      activeTrackColor: AppTheme.primaryNeon.withOpacity(0.3),
+                                      inactiveThumbColor: AppTheme.textMuted,
+                                      inactiveTrackColor: AppTheme.backgroundLighter,
                                     ),
                                   ],
                                 ),
-                                const Spacer(),
-                                Switch(
-                                  value: _isProtectionActive,
-                                  onChanged: (value) => _toggleProtection(),
-                                  activeColor: AppTheme.primaryNeon,
-                                  activeTrackColor: AppTheme.primaryNeon.withOpacity(0.3),
-                                  inactiveThumbColor: AppTheme.textMuted,
-                                  inactiveTrackColor: AppTheme.backgroundLighter,
+                              ),
+                              
+                              // Protection stats
+                              if (_isProtectionActive) ...[
+                                Divider(
+                                  color: AppTheme.textMuted.withOpacity(0.2),
+                                  height: 1,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: padding,
+                                    vertical: padding,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Expanded(
+                                        child: _buildStatItem(
+                                          label: 'Total Protection',
+                                          value: '₨13,000',
+                                          icon: Icons.account_balance_wallet_outlined,
+                                          color: AppTheme.primaryNeon,
+                                          iconSize: smallIconSize,
+                                          valueFontSize: bodyFontSize,
+                                          labelFontSize: smallFontSize,
+                                        ),
+                                      ),
+                                      Container(
+                                        height: screenHeight * 0.05,
+                                        width: 1,
+                                        color: AppTheme.textMuted.withOpacity(0.2),
+                                      ),
+                                      Expanded(
+                                        child: _buildStatItem(
+                                          label: 'Active Members',
+                                          value: '3/4',
+                                          icon: Icons.people_outline,
+                                          color: AppTheme.warningNeon,
+                                          iconSize: smallIconSize,
+                                          valueFontSize: bodyFontSize,
+                                          labelFontSize: smallFontSize,
+                                        ),
+                                      ),
+                                      Container(
+                                        height: screenHeight * 0.05,
+                                        width: 1,
+                                        color: AppTheme.textMuted.withOpacity(0.2),
+                                      ),
+                                      Expanded(
+                                        child: _buildStatItem(
+                                          label: 'Claims',
+                                          value: '0',
+                                          icon: Icons.history_outlined,
+                                          color: AppTheme.accentNeon,
+                                          iconSize: smallIconSize,
+                                          valueFontSize: bodyFontSize,
+                                          labelFontSize: smallFontSize,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
+                            ],
+                          ),
+                        );
+                      },
+                    )
+                        .animate()
+                        .fadeIn(duration: 800.ms)
+                        .slide(begin: const Offset(0, -0.2), end: Offset.zero, duration: 800.ms),
+                    
+                    // Members header
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: padding,
+                        vertical: smallPadding,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Group Members',
+                              style: TextStyle(
+                                color: AppTheme.textPrimary,
+                                fontSize: subtitleFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          
-                          // Protection stats
-                          if (_isProtectionActive) ...[
-                            Divider(
-                              color: AppTheme.textMuted.withOpacity(0.2),
-                              height: 1,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppTheme.spacingM,
-                                vertical: AppTheme.spacingM,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildStatItem(
-                                    label: 'Total Protection',
-                                    value: '₨13,000',
-                                    icon: Icons.account_balance_wallet_outlined,
-                                    color: AppTheme.primaryNeon,
-                                  ),
-                                  Container(
-                                    height: 40,
-                                    width: 1,
-                                    color: AppTheme.textMuted.withOpacity(0.2),
-                                  ),
-                                  _buildStatItem(
-                                    label: 'Active Members',
-                                    value: '3/4',
-                                    icon: Icons.people_outline,
-                                    color: AppTheme.warningNeon,
-                                  ),
-                                  Container(
-                                    height: 40,
-                                    width: 1,
-                                    color: AppTheme.textMuted.withOpacity(0.2),
-                                  ),
-                                  _buildStatItem(
-                                    label: 'Claims',
-                                    value: '0',
-                                    icon: Icons.history_outlined,
-                                    color: AppTheme.accentNeon,
-                                  ),
-                                ],
+                          if (_isEditing)
+                            FuturisticButton(
+                              text: 'Add Member',
+                              onPressed: () {},
+                              prefixIcon: Icons.person_add_alt_1_rounded,
+                              height: buttonSize * 0.9,
+                              borderRadius: AppTheme.radiusLarge,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: padding,
+                                vertical: smallPadding * 0.5,
                               ),
                             ),
-                          ],
                         ],
                       ),
-                    );
-                  },
-                )
-                    .animate()
-                    .fadeIn(duration: 800.ms)
-                    .slide(begin: const Offset(0, -0.2), end: Offset.zero, duration: 800.ms),
-                
-                // Members header
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingM,
-                    vertical: AppTheme.spacingM,
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Group Members',
-                        style: TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (_isEditing)
-                        FuturisticButton(
-                          text: 'Add Member',
-                          onPressed: () {},
-                          prefixIcon: Icons.person_add_alt_1_rounded,
-                          height: 40,
-                          borderRadius: AppTheme.radiusLarge,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppTheme.spacingM,
-                            vertical: AppTheme.spacingXS,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                
-                // Members list
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(
-                      left: AppTheme.spacingM,
-                      right: AppTheme.spacingM,
-                      bottom: AppTheme.spacingL,
                     ),
-                    itemCount: _members.length,
-                    itemBuilder: (context, index) {
-                      return _buildMemberCard(_members[index], index);
-                    },
-                  ),
+                    
+                    // Members list
+                    Expanded(
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(
+                          left: padding,
+                          right: padding,
+                          bottom: padding * 1.5,
+                        ),
+                        itemCount: _members.length,
+                        itemBuilder: (context, index) {
+                          return _buildMemberCard(
+                            _members[index], 
+                            index, 
+                            screenWidth,
+                            buttonSize,
+                            padding,
+                            smallPadding,
+                            bodyFontSize,
+                            smallFontSize,
+                            smallIconSize
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    // Bottom action
+                    Padding(
+                      padding: EdgeInsets.all(padding),
+                      child: FuturisticButton(
+                        text: _isEditing ? 'Save Changes' : 'Group Settings',
+                        onPressed: _isEditing ? _toggleEditing : () {},
+                        color: _isEditing ? AppTheme.primaryNeon : AppTheme.accentNeon,
+                        prefixIcon: _isEditing ? Icons.check : Icons.settings,
+                      ),
+                    )
+                        .animate()
+                        .fadeIn(delay: 600.ms, duration: 800.ms),
+                  ],
                 ),
-                
-                // Bottom action
-                Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
-                  child: FuturisticButton(
-                    text: _isEditing ? 'Save Changes' : 'Group Settings',
-                    onPressed: _isEditing ? _toggleEditing : () {},
-                    color: _isEditing ? AppTheme.primaryNeon : AppTheme.accentNeon,
-                    prefixIcon: _isEditing ? Icons.check : Icons.settings,
-                  ),
-                )
-                    .animate()
-                    .fadeIn(delay: 600.ms, duration: 800.ms),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        }
       ),
     );
   }
@@ -444,40 +503,61 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
     required String value,
     required IconData icon,
     required Color color,
+    required double iconSize,
+    required double valueFontSize,
+    required double labelFontSize,
   }) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           icon,
           color: color,
-          size: 20,
+          size: iconSize,
         ),
         const SizedBox(height: 6),
-        Text(
-          value,
-          style: TextStyle(
-            color: AppTheme.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: valueFontSize,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            color: AppTheme.textMuted,
-            fontSize: 12,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: AppTheme.textMuted,
+              fontSize: labelFontSize,
+            ),
           ),
         ),
       ],
     );
   }
   
-  Widget _buildMemberCard(GroupMember member, int index) {
+  Widget _buildMemberCard(
+    GroupMember member, 
+    int index, 
+    double screenWidth,
+    double buttonSize,
+    double padding,
+    double smallPadding,
+    double bodyFontSize,
+    double smallFontSize,
+    double iconSize,
+  ) {
     final isAdmin = member.role == 'Admin';
+    final avatarSize = buttonSize * 1.1;
     
     return NeuroCard(
-      margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+      margin: EdgeInsets.only(bottom: padding),
       borderRadius: AppTheme.radiusMedium,
       depth: 3,
       gradient: isAdmin
@@ -491,7 +571,7 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
             )
           : null,
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingM),
+        padding: EdgeInsets.all(padding),
         child: Row(
           children: [
             // Avatar and status indicator
@@ -499,8 +579,8 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: avatarSize,
+                  height: avatarSize,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     border: Border.all(
@@ -517,11 +597,11 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
                 ),
                 if (member.isActive)
                   Positioned(
-                    bottom: -5,
-                    right: -5,
+                    bottom: -avatarSize * 0.1,
+                    right: -avatarSize * 0.1,
                     child: Container(
-                      width: 18,
-                      height: 18,
+                      width: avatarSize * 0.35,
+                      height: avatarSize * 0.35,
                       decoration: BoxDecoration(
                         color: AppTheme.accentNeon,
                         shape: BoxShape.circle,
@@ -542,7 +622,7 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
               ],
             ),
             
-            const SizedBox(width: AppTheme.spacingM),
+            SizedBox(width: padding),
             
             // Member info
             Expanded(
@@ -551,20 +631,23 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
                 children: [
                   Row(
                     children: [
-                      Text(
-                        member.name,
-                        style: TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      Flexible(
+                        child: Text(
+                          member.name,
+                          style: TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: bodyFontSize,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: AppTheme.spacingXS),
+                      SizedBox(width: smallPadding * 0.5),
                       if (isAdmin)
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: smallPadding * 0.8,
+                            vertical: smallPadding * 0.3,
                           ),
                           decoration: BoxDecoration(
                             color: AppTheme.primaryNeon.withOpacity(0.2),
@@ -574,43 +657,46 @@ class _GroupProtectionScreenState extends State<GroupProtectionScreen> with Sing
                             'Admin',
                             style: TextStyle(
                               color: AppTheme.primaryNeon,
-                              fontSize: 10,
+                              fontSize: smallFontSize * 0.85,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: smallPadding * 0.5),
                   Row(
                     children: [
                       Icon(
                         Icons.account_balance_wallet_outlined,
                         color: AppTheme.textMuted,
-                        size: 14,
+                        size: iconSize * 0.9,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: smallPadding * 0.5),
                       Text(
                         '₨${member.contribution.toStringAsFixed(0)}',
                         style: TextStyle(
                           color: AppTheme.textSecondary,
-                          fontSize: 14,
+                          fontSize: smallFontSize,
                         ),
                       ),
-                      const SizedBox(width: AppTheme.spacingM),
+                      SizedBox(width: padding),
                       Icon(
                         Icons.shield_outlined,
                         color: member.isSharing ? AppTheme.primaryNeon : AppTheme.textMuted,
-                        size: 14,
+                        size: iconSize * 0.9,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        member.isSharing ? 'Sharing' : 'Not sharing',
-                        style: TextStyle(
-                          color: member.isSharing
-                              ? AppTheme.textSecondary
-                              : AppTheme.textMuted,
-                          fontSize: 14,
+                      SizedBox(width: smallPadding * 0.5),
+                      Flexible(
+                        child: Text(
+                          member.isSharing ? 'Sharing' : 'Not sharing',
+                          style: TextStyle(
+                            color: member.isSharing
+                                ? AppTheme.textSecondary
+                                : AppTheme.textMuted,
+                            fontSize: smallFontSize,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
