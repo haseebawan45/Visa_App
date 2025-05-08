@@ -838,6 +838,14 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       }
     }
 
+    // Handle "Back to menu" options immediately
+    if (suggestion == "Back to main menu" || 
+        suggestion == "Go back to main menu" || 
+        suggestion == "Return to menu") {
+      _handleReturnToMainMenu();
+      return;
+    }
+
     // Simulate assistant typing
     setState(() {
       _isTyping = true;
@@ -910,6 +918,8 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
             ],
           );
           _conversationContext["stage"] = "welcome";
+        } else if (suggestion == "Back to main menu") {
+          _handleReturnToMainMenu();
         }
       } else if (stage == "merchant_contact") {
         if (suggestion == "Other merchant") {
@@ -917,6 +927,8 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
             "Please type the name of the merchant you wish to contact:",
             ChatMessageType.assistant,
           );
+        } else if (suggestion == "Go back to main menu") {
+          _handleReturnToMainMenu();
         } else {
           _addMessage(
             "Here's the contact information for $suggestion:\n\n" +
@@ -940,6 +952,78 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
           );
         }
       }
+    });
+  }
+
+  void _handleReturnToMainMenu() {
+    // Check if we should acknowledge completed task first
+    final currentStage = _conversationContext["stage"] as String? ?? "welcome";
+    final previousIntent = _conversationContext["user_intent"] as String? ?? "unknown";
+    
+    // Provide contextual acknowledgment before returning to menu
+    if (currentStage != "welcome") {
+      String acknowledgment = "I'll take you back to the main menu.";
+      
+      // Add more context based on what they were doing before
+      if (previousIntent == "refund" && currentStage == "refund_reason") {
+        acknowledgment = "Your refund request has been saved. " + acknowledgment;
+      } else if (previousIntent == "dispute") {
+        acknowledgment = "I've noted your dispute information. " + acknowledgment;
+      } else if (previousIntent == "track") {
+        acknowledgment = "Let me know if you need more details about your refunds later. " + acknowledgment;
+      } else if (previousIntent == "contact") {
+        acknowledgment = "I hope the contact information was helpful. " + acknowledgment;
+      }
+      
+      // Send the acknowledgment message
+      _addMessage(
+        acknowledgment,
+        ChatMessageType.assistant,
+      );
+    }
+    
+    // Wait a moment before showing the main menu options
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      
+      // Reset conversation context but keep user data and history
+      var savedData = <String, dynamic>{};
+      if (_conversationContext.containsKey("user_name")) {
+        savedData["user_name"] = _conversationContext["user_name"];
+      }
+      if (_conversationContext.containsKey("history")) {
+        savedData["history"] = _conversationContext["history"];
+      }
+      if (_conversationContext.containsKey("suggestion_taps")) {
+        savedData["suggestion_taps"] = _conversationContext["suggestion_taps"];
+      }
+      if (_conversationContext.containsKey("prefers_suggestions")) {
+        savedData["prefers_suggestions"] = _conversationContext["prefers_suggestions"];
+      }
+      
+      _conversationContext.clear();
+      _conversationContext.addAll(savedData);
+      _conversationContext["stage"] = "welcome";
+      
+      // Show the main menu with a friendly prompt
+      _addMessage(
+        "What would you like to do next?",
+        ChatMessageType.assistant,
+        suggestions: [
+          "Request a refund",
+          "Track my refund status",
+          "Dispute a transaction",
+          "Contact merchant",
+          "I'm done for now"
+        ],
+        actions: [
+          ChatAction(
+            label: "View recent transactions",
+            actionType: "view_transactions",
+            parameters: {"days": 7},
+          ),
+        ],
+      );
     });
   }
 
