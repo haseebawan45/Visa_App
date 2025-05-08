@@ -129,244 +129,294 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions for responsive sizing
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    
+    // Calculate responsive spacings based on screen size
+    final double horizontalPadding = screenWidth * 0.05;
+    final double verticalSpacing = screenHeight * 0.02;
+    
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppTheme.backgroundLighter,
-                  AppTheme.background,
-                  AppTheme.backgroundDarker,
-                ],
-              ),
-            ),
-          ),
-          
-          // Main content
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // App Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingM,
-                    vertical: AppTheme.spacingM,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Logo
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryNeon.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.shield,
-                              color: AppTheme.primaryNeon,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: AppTheme.spacingS),
-                          Text(
-                            'NEUPAY',
-                            style: TextStyle(
-                              color: AppTheme.textPrimary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      // Action buttons
-                      Row(
-                        children: [
-                          _buildActionButton(
-                            icon: Icons.notifications_outlined,
-                            badge: 2,
-                            onTap: () {},
-                          ),
-                          const SizedBox(width: AppTheme.spacingS),
-                          _buildActionButton(
-                            icon: Icons.person_outline,
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Responsive layout based on available constraints
+          return Stack(
+            children: [
+              // Background gradient
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppTheme.backgroundLighter,
+                      AppTheme.background,
+                      AppTheme.backgroundDarker,
                     ],
                   ),
                 ),
-                
-                const SizedBox(height: AppTheme.spacingS),
-                
-                // Balance Card with visibility toggle button
-                Stack(
+              ),
+              
+              // Main content
+              SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    BalanceCard(
-                      balance: 275850.75,
-                      isLocked: _isBalanceLocked,
-                      onLockChanged: _onLockChanged,
-                      onTap: () {},
-                      expenditurePercentage: 0.65,
-                      gradientColors: const [
-                        AppTheme.primaryNeon,
-                        AppTheme.secondaryNeon,
-                      ],
+                    // App Bar
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                        vertical: verticalSpacing,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Logo
+                          Row(
+                            children: [
+                              Container(
+                                width: screenWidth * 0.1,
+                                height: screenWidth * 0.1,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryNeon.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.shield,
+                                  color: AppTheme.primaryNeon,
+                                  size: screenWidth * 0.05,
+                                ),
+                              ),
+                              SizedBox(width: screenWidth * 0.02),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'NEUPAY',
+                                  style: TextStyle(
+                                    color: AppTheme.textPrimary,
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          
+                          // Action buttons
+                          Row(
+                            children: [
+                              _buildActionButton(
+                                icon: Icons.notifications_outlined,
+                                badge: 2,
+                                onTap: () {},
+                                buttonSize: screenWidth * 0.1,
+                              ),
+                              SizedBox(width: screenWidth * 0.02),
+                              _buildActionButton(
+                                icon: Icons.person_outline,
+                                onTap: () {},
+                                buttonSize: screenWidth * 0.1,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                     
-                    // Visibility toggle button positioned over the card
-                    Positioned(
-                      top: 16,
-                      right: 32,
-                      child: NeuroCard(
-                        width: 48,
-                        height: 48,
-                        borderRadius: AppTheme.radiusRounded,
-                        depth: 3,
-                        padding: const EdgeInsets.all(0),
-                        onTap: () => _onLockChanged(!_isBalanceLocked),
-                        glow: _isBalanceLocked ? AppTheme.warningNeon : AppTheme.primaryNeon,
-                        child: Icon(
-                          _isBalanceLocked ? Icons.visibility : Icons.visibility_off,
-                          color: _isBalanceLocked ? AppTheme.warningNeon : AppTheme.primaryNeon,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: AppTheme.spacingL),
-                
-                // Actions row
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
-                  child: Row(
-                    children: [
-                      _buildQuickAction(
-                        icon: Icons.add_rounded,
-                        label: 'Add Money',
-                        color: AppTheme.primaryNeon,
-                        onTap: () => _navigateToScreen(const AddMoneyScreen()),
-                      ),
-                      _buildQuickAction(
-                        icon: Icons.send_rounded,
-                        label: 'Send',
-                        color: AppTheme.accentNeon,
-                        onTap: () => _navigateToScreen(const SendMoneyScreen()),
-                      ),
-                      _buildQuickAction(
-                        icon: Icons.flash_on_rounded,
-                        label: 'Ghost Pay',
-                        color: AppTheme.secondaryNeon,
-                        onTap: () => _navigateToScreen(const GhostPaymentScreen()),
-                      ),
-                      _buildQuickAction(
-                        icon: Icons.credit_card_off_rounded,
-                        label: 'Freeze Card',
-                        color: AppTheme.dangerNeon,
-                        onTap: _toggleCardFreeze,
-                      ),
-                      _buildQuickAction(
-                        icon: Icons.group_rounded,
-                        label: 'Group Plan',
-                        color: AppTheme.warningNeon,
-                        onTap: () => _navigateToScreen(const GroupProtectionScreen()),
-                      ),
-                      _buildQuickAction(
-                        icon: Icons.travel_explore,
-                        label: 'Travel Mode',
-                        color: AppTheme.accentNeon,
-                        onTap: () => _navigateToScreen(const TravelModeScreen()),
-                      ),
-                      _buildQuickAction(
-                        icon: Icons.support_agent,
-                        label: 'Refund Help',
-                        color: AppTheme.primaryNeon,
-                        onTap: () => _navigateToScreen(const RefundAssistantScreen()),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: AppTheme.spacingL),
-                
-                // Transactions header
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Recent Transactions',
-                        style: TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Row(
+                    SizedBox(height: verticalSpacing * 0.5),
+                    
+                    // Balance Card with visibility toggle button
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      child: AspectRatio(
+                        aspectRatio: 1.7,
+                        child: Stack(
                           children: [
-                            Text(
-                              'View All',
-                              style: TextStyle(
-                                color: AppTheme.primaryNeon,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            BalanceCard(
+                              balance: 275850.75,
+                              isLocked: _isBalanceLocked,
+                              onLockChanged: _onLockChanged,
+                              onTap: () {},
+                              expenditurePercentage: 0.65,
+                              gradientColors: const [
+                                AppTheme.primaryNeon,
+                                AppTheme.secondaryNeon,
+                              ],
                             ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: AppTheme.primaryNeon,
-                              size: 12,
+                            
+                            // Visibility toggle button positioned over the card
+                            Positioned(
+                              top: constraints.maxHeight * 0.03,
+                              right: constraints.maxWidth * 0.08,
+                              child: NeuroCard(
+                                width: screenWidth * 0.11,
+                                height: screenWidth * 0.11,
+                                borderRadius: AppTheme.radiusRounded,
+                                depth: 3,
+                                padding: const EdgeInsets.all(0),
+                                onTap: () => _onLockChanged(!_isBalanceLocked),
+                                glow: _isBalanceLocked ? AppTheme.warningNeon : AppTheme.primaryNeon,
+                                child: Icon(
+                                  _isBalanceLocked ? Icons.visibility : Icons.visibility_off,
+                                  color: _isBalanceLocked ? AppTheme.warningNeon : AppTheme.primaryNeon,
+                                  size: screenWidth * 0.06,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    
+                    SizedBox(height: verticalSpacing * 1.5),
+                    
+                    // Actions row
+                    Container(
+                      height: screenHeight * 0.11,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                        child: Row(
+                          children: [
+                            _buildQuickAction(
+                              icon: Icons.add_rounded,
+                              label: 'Add Money',
+                              color: AppTheme.primaryNeon,
+                              onTap: () => _navigateToScreen(const AddMoneyScreen()),
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                            _buildQuickAction(
+                              icon: Icons.send_rounded,
+                              label: 'Send',
+                              color: AppTheme.accentNeon,
+                              onTap: () => _navigateToScreen(const SendMoneyScreen()),
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                            _buildQuickAction(
+                              icon: Icons.flash_on_rounded,
+                              label: 'Ghost Pay',
+                              color: AppTheme.secondaryNeon,
+                              onTap: () => _navigateToScreen(const GhostPaymentScreen()),
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                            _buildQuickAction(
+                              icon: Icons.credit_card_off_rounded,
+                              label: 'Freeze Card',
+                              color: AppTheme.dangerNeon,
+                              onTap: _toggleCardFreeze,
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                            _buildQuickAction(
+                              icon: Icons.group_rounded,
+                              label: 'Group Plan',
+                              color: AppTheme.warningNeon,
+                              onTap: () => _navigateToScreen(const GroupProtectionScreen()),
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                            _buildQuickAction(
+                              icon: Icons.travel_explore,
+                              label: 'Travel Mode',
+                              color: AppTheme.accentNeon,
+                              onTap: () => _navigateToScreen(const TravelModeScreen()),
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                            _buildQuickAction(
+                              icon: Icons.support_agent,
+                              label: 'Refund Help',
+                              color: AppTheme.primaryNeon,
+                              onTap: () => _navigateToScreen(const RefundAssistantScreen()),
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    
+                    SizedBox(height: verticalSpacing * 1.5),
+                    
+                    // Transactions header
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'Recent Transactions',
+                              style: TextStyle(
+                                color: AppTheme.textPrimary,
+                                fontSize: screenWidth * 0.045,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: Row(
+                              children: [
+                                Text(
+                                  'View All',
+                                  style: TextStyle(
+                                    color: AppTheme.primaryNeon,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: screenWidth * 0.035,
+                                  ),
+                                ),
+                                SizedBox(width: screenWidth * 0.01),
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: AppTheme.primaryNeon,
+                                  size: screenWidth * 0.03,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    SizedBox(height: verticalSpacing * 0.5),
+                    
+                    // Transactions list
+                    Expanded(
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(
+                          top: verticalSpacing * 0.5, 
+                          bottom: verticalSpacing * 2
+                        ),
+                        itemCount: _transactions.length,
+                        itemBuilder: (context, index) {
+                          return TransactionCard(
+                            transaction: _transactions[index],
+                            index: index,
+                            onTap: () {},
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                
-                const SizedBox(height: AppTheme.spacingS),
-                
-                // Transactions list
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(top: AppTheme.spacingS, bottom: AppTheme.spacingXL),
-                    itemCount: _transactions.length,
-                    itemBuilder: (context, index) {
-                      return TransactionCard(
-                        transaction: _transactions[index],
-                        index: index,
-                        onTap: () {},
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Scam Alert Overlay
-          if (_showScamAlert)
-            _buildScamAlert(),
-        ],
+              ),
+              
+              // Scam Alert Overlay
+              if (_showScamAlert)
+                _buildScamAlert(screenWidth, screenHeight),
+            ],
+          );
+        }
       ),
     );
   }
@@ -375,13 +425,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     required IconData icon,
     required VoidCallback onTap,
     int? badge,
+    required double buttonSize,
   }) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
         NeuroCard(
-          width: 42,
-          height: 42,
+          width: buttonSize,
+          height: buttonSize,
           borderRadius: AppTheme.radiusRounded,
           depth: 3,
           padding: const EdgeInsets.all(0),
@@ -389,15 +440,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           child: Icon(
             icon,
             color: AppTheme.textSecondary,
-            size: 20,
+            size: buttonSize * 0.5,
           ),
         ),
         if (badge != null)
           Positioned(
-            top: -4,
-            right: -4,
+            top: -buttonSize * 0.1,
+            right: -buttonSize * 0.1,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: EdgeInsets.all(buttonSize * 0.1),
               decoration: BoxDecoration(
                 color: AppTheme.dangerNeon,
                 shape: BoxShape.circle,
@@ -409,12 +460,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   ),
                 ],
               ),
-              child: Text(
-                badge.toString(),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  badge.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: buttonSize * 0.25,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -428,17 +482,20 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     required String label,
     required Color color,
     required VoidCallback onTap,
+    required double iconSize,
+    required double cardSize,
   }) {
     // Special case for Freeze Card to show active state
     final bool isActive = label == 'Freeze Card' && _isCardFrozen;
     
     return Container(
-      margin: const EdgeInsets.only(right: AppTheme.spacingM),
+      margin: EdgeInsets.only(right: cardSize * 0.3),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           NeuroCard(
-            width: 60,
-            height: 60,
+            width: cardSize,
+            height: cardSize,
             borderRadius: AppTheme.radiusMedium,
             depth: 4,
             onTap: onTap,
@@ -447,16 +504,23 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             child: Icon(
               icon,
               color: isActive ? Colors.white : color,
-              size: 28,
+              size: iconSize,
             ),
           ),
-          const SizedBox(height: AppTheme.spacingXS),
-          Text(
-            label,
-            style: TextStyle(
-              color: isActive ? color : AppTheme.textSecondary,
-              fontSize: 12,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          SizedBox(height: cardSize * 0.1),
+          Container(
+            width: cardSize * 1.2,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isActive ? color : AppTheme.textSecondary,
+                  fontSize: cardSize * 0.2,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
             ),
           ),
         ],
@@ -464,23 +528,21 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildScamAlert() {
+  Widget _buildScamAlert(double screenWidth, double screenHeight) {
     final fraudTransaction = _transactions.firstWhere(
       (t) => t.status == TransactionStatus.flagged,
       orElse: () => _transactions.first,
     );
 
     return Positioned(
-      bottom: 20,
-      left: 0,
-      right: 0,
+      bottom: screenHeight * 0.03,
+      left: screenWidth * 0.05,
+      right: screenWidth * 0.05,
       child: GestureDetector(
         onTap: _dismissScamAlert,
         child: GlassContainer(
-          height: 120,
-          margin: const EdgeInsets.symmetric(
-            horizontal: AppTheme.spacingM,
-          ),
+          height: screenHeight * 0.15,
+          margin: EdgeInsets.zero,
           borderRadius: AppTheme.radiusLarge,
           blur: AppTheme.blurStrong,
           opacity: AppTheme.glassOpacityMedium,
@@ -496,9 +558,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 animation: _alertController,
                 builder: (context, child) {
                   return Container(
-                    width: 50,
-                    height: 50,
-                    margin: const EdgeInsets.all(AppTheme.spacingM),
+                    width: screenWidth * 0.13,
+                    height: screenWidth * 0.13,
+                    margin: EdgeInsets.all(screenWidth * 0.04),
                     decoration: BoxDecoration(
                       color: AppTheme.dangerNeon.withOpacity(0.1),
                       shape: BoxShape.circle,
@@ -513,7 +575,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     child: Icon(
                       Icons.warning_amber_rounded,
                       color: AppTheme.dangerNeon,
-                      size: 28,
+                      size: screenWidth * 0.07,
                     ),
                   );
                 },
@@ -525,28 +587,34 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'SCAM RADAR ALERT',
-                      style: TextStyle(
-                        color: AppTheme.dangerNeon,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'SCAM RADAR ALERT',
+                        style: TextStyle(
+                          color: AppTheme.dangerNeon,
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.035,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: AppTheme.spacingXS),
-                    Text(
-                      'Suspicious transaction blocked: ${fraudTransaction.title}',
-                      style: TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 13,
+                    SizedBox(height: screenHeight * 0.005),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Suspicious transaction blocked: ${fraudTransaction.title}',
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontSize: screenWidth * 0.032,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: AppTheme.spacingXS),
+                    SizedBox(height: screenHeight * 0.005),
                     Text(
                       'Tap to review',
                       style: TextStyle(
                         color: AppTheme.textMuted,
-                        fontSize: 12,
+                        fontSize: screenWidth * 0.03,
                       ),
                     ),
                   ],
@@ -555,13 +623,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               
               // Close button
               Padding(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: EdgeInsets.all(screenWidth * 0.02),
                 child: IconButton(
                   onPressed: _dismissScamAlert,
                   icon: Icon(
                     Icons.close_rounded,
                     color: AppTheme.textMuted,
-                    size: 20,
+                    size: screenWidth * 0.05,
                   ),
                 ),
               ),
