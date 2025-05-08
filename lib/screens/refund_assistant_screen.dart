@@ -189,9 +189,9 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
     } else if (intent == "contact") {
       _showMerchantContactOptions();
     } else {
-      _addMessage(
+        _addMessage(
         "I'll be happy to assist you with that. What would you like to do?",
-        ChatMessageType.assistant,
+          ChatMessageType.assistant,
         suggestions: [
           "Request a refund",
           "Track my refund status",
@@ -229,9 +229,9 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
   }
 
   void _showMerchantContactOptions() {
-    _addMessage(
+        _addMessage(
       "I can help you contact the merchant directly. Which merchant would you like to contact?",
-      ChatMessageType.assistant,
+          ChatMessageType.assistant,
       suggestions: [
         "Coffee Shop",
         "Online Store",
@@ -252,10 +252,10 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
 
   void _handleRefundRequestResponse(String userMessage) {
     // Handle responses in the refund request flow
-    _addMessage(
+        _addMessage(
       "Great! Now, please tell me why you're requesting a refund:",
-      ChatMessageType.assistant,
-      suggestions: [
+          ChatMessageType.assistant,
+          suggestions: [
         "Wrong item received",
         "Item not as described",
         "Item not received",
@@ -374,7 +374,7 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       final stage = _conversationContext["stage"];
       
       if (stage == "welcome") {
-        if (suggestion == "Request a refund") {
+      if (suggestion == "Request a refund") {
           _startRefundFlow();
         } else if (suggestion == "Track my refund status") {
           _showRefundStatus();
@@ -392,7 +392,7 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
       } else if (stage == "refund_status") {
         if (suggestion.contains("Details on")) {
           String merchant = suggestion.replaceAll("Details on ", "").replaceAll(" refund", "");
-          _addMessage(
+        _addMessage(
             "Here are the details for your $merchant refund request:\n\n" +
             "• Reference: REF" + (merchant == "Coffee Shop" ? "12345" : "67890") + "\n" +
             "• Amount: ₨" + (merchant == "Coffee Shop" ? "1,250" : "5,890") + "\n" +
@@ -400,7 +400,7 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
             "• Status: " + (merchant == "Coffee Shop" ? "In Progress" : "Completed") + "\n" +
             "• " + (merchant == "Coffee Shop" ? "Expected completion: 3-5 business days" : "Refunded on: June 8, 2023") + "\n\n" +
             "Would you like to take any action?",
-            ChatMessageType.assistant,
+          ChatMessageType.assistant,
             suggestions: merchant == "Coffee Shop" ? [
               "Cancel request",
               "Update request details",
@@ -412,7 +412,7 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
             ],
           );
         } else if (suggestion == "I have another question") {
-          _addMessage(
+        _addMessage(
             "What would you like to know?",
             ChatMessageType.assistant,
             suggestions: [
@@ -426,10 +426,10 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
         }
       } else if (stage == "merchant_contact") {
         if (suggestion == "Other merchant") {
-          _addMessage(
+        _addMessage(
             "Please type the name of the merchant you wish to contact:",
-            ChatMessageType.assistant,
-          );
+          ChatMessageType.assistant,
+        );
         } else {
           _addMessage(
             "Here's the contact information for $suggestion:\n\n" +

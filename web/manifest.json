@@ -1,6 +1,6 @@
 {
-    "name": "visa_app",
-    "short_name": "visa_app",
+    "name": "Visa App",
+    "short_name": "Visa App",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
