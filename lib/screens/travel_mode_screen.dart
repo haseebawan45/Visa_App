@@ -28,15 +28,126 @@ class _TravelModeScreenState extends State<TravelModeScreen> with SingleTickerPr
   late AnimationController _mapAnimationController;
   
   final List<String> _countriesList = [
-    'United Arab Emirates',
-    'United Kingdom',
-    'United States',
-    'Qatar',
-    'Saudi Arabia',
-    'Turkey',
-    'Malaysia',
-    'Singapore',
-  ];
+  'Pakistan',
+  'Afghanistan',
+  'Albania',
+  'Algeria',
+  'Andorra',
+  'Angola',
+  'Argentina',
+  'Armenia',
+  'Australia',
+  'Austria',
+  'Azerbaijan',
+  'Bahrain',
+  'Bangladesh',
+  'Belarus',
+  'Belgium',
+  'Bhutan',
+  'Bosnia and Herzegovina',
+  'Brazil',
+  'Brunei',
+  'Bulgaria',
+  'Cambodia',
+  'Cameroon',
+  'Canada',
+  'Chile',
+  'China',
+  'Colombia',
+  'Croatia',
+  'Cyprus',
+  'Czech Republic',
+  'Denmark',
+  'Egypt',
+  'Estonia',
+  'Ethiopia',
+  'Finland',
+  'France',
+  'Georgia',
+  'Germany',
+  'Ghana',
+  'Greece',
+  'Hungary',
+  'Iceland',
+  'India',
+  'Indonesia',
+  'Iran',
+  'Iraq',
+  'Ireland',
+  'Israel',
+  'Italy',
+  'Japan',
+  'Jordan',
+  'Kazakhstan',
+  'Kenya',
+  'Kuwait',
+  'Kyrgyzstan',
+  'Laos',
+  'Latvia',
+  'Lebanon',
+  'Libya',
+  'Lithuania',
+  'Luxembourg',
+  'Malaysia',
+  'Maldives',
+  'Malta',
+  'Mauritius',
+  'Mexico',
+  'Moldova',
+  'Monaco',
+  'Mongolia',
+  'Montenegro',
+  'Morocco',
+  'Nepal',
+  'Netherlands',
+  'New Zealand',
+  'Nigeria',
+  'North Macedonia',
+  'Norway',
+  'Oman',
+  'Palestine',
+  'Philippines',
+  'Poland',
+  'Portugal',
+  'Qatar',
+  'Romania',
+  'Russia',
+  'Rwanda',
+  'Saudi Arabia',
+  'Serbia',
+  'Singapore',
+  'Slovakia',
+  'Slovenia',
+  'South Africa',
+  'South Korea',
+  'Spain',
+  'Sri Lanka',
+  'Sudan',
+  'Sweden',
+  'Switzerland',
+  'Syria',
+  'Tajikistan',
+  'Tanzania',
+  'Thailand',
+  'Tunisia',
+  'Turkey',
+  'Turkmenistan',
+  'UAE',
+  'Uganda',
+  'Ukraine',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States',
+  'Uruguay',
+  'Uzbekistan',
+  'Vatican City',
+  'Venezuela',
+  'Vietnam',
+  'Yemen',
+  'Zambia',
+  'Zimbabwe',
+];
+
   
   @override
   void initState() {
@@ -125,359 +236,424 @@ class _TravelModeScreenState extends State<TravelModeScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions for responsive sizing
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
+    final EdgeInsets systemPadding = MediaQuery.of(context).padding;
+    
+    // Calculate responsive dimensions
+    final double buttonSize = screenWidth * 0.11;
+    final double iconSize = screenWidth * 0.05;
+    final double smallIconSize = screenWidth * 0.04;
+    final double paddingSize = screenWidth * 0.04;
+    final double smallPaddingSize = screenWidth * 0.02;
+    final double titleFontSize = screenWidth * 0.055;
+    final double subtitleFontSize = screenWidth * 0.045;
+    final double bodyFontSize = screenWidth * 0.04;
+    final double smallFontSize = screenWidth * 0.03;
+    
+    // Calculate map container height based on screen size
+    final double mapContainerHeight = _isTravelModeActive 
+                                      ? screenHeight * 0.25 
+                                      : screenHeight * 0.2;
+    
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppTheme.backgroundDarker,
-                  AppTheme.background,
-                  const Color(0xFF0F1A2A),
-                ],
-              ),
-            ),
-          ),
-          
-          // Map visualization in background
-          if (_isTravelModeActive) ...[
-            Positioned.fill(
-              child: Opacity(
-                opacity: 0.2,
-                child: _buildAnimatedMap(),
-              ),
-            ),
-          ],
-          
-          // Main content
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // App bar
-                Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: NeuroCard(
-                          width: 45,
-                          height: 45,
-                          borderRadius: AppTheme.radiusRounded,
-                          depth: 3,
-                          padding: const EdgeInsets.all(0),
-                          child: const Icon(
-                            Icons.arrow_back_rounded,
-                            color: AppTheme.textSecondary,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppTheme.spacingM),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Travel Mode',
-                            style: TextStyle(
-                              color: AppTheme.textPrimary,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            _isTravelModeActive
-                                ? 'Active Protection Enabled'
-                                : 'Currently Inactive',
-                            style: TextStyle(
-                              color: _isTravelModeActive
-                                  ? AppTheme.accentNeon
-                                  : AppTheme.textMuted,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              // Background gradient
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppTheme.backgroundDarker,
+                      AppTheme.background,
+                      const Color(0xFF0F1A2A),
                     ],
                   ),
                 ),
-                
-                // Map visualization & Toggle container
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 500),
-                  height: _isTravelModeActive ? 250 : 200,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingM,
-                    vertical: AppTheme.spacingS,
+              ),
+              
+              // Map visualization in background
+              if (_isTravelModeActive) ...[
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.2,
+                    child: _buildAnimatedMap(screenWidth, screenHeight),
                   ),
-                  child: GlassContainer(
-                    borderRadius: AppTheme.radiusLarge,
-                    opacity: _isTravelModeActive
-                        ? AppTheme.glassOpacityLow
-                        : AppTheme.glassOpacityMedium,
-                    blur: AppTheme.blurStrong,
-                    border: Border.all(
-                      color: _isTravelModeActive
-                          ? AppTheme.accentNeon.withOpacity(0.3)
-                          : Colors.transparent,
-                      width: 1.5,
-                    ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: _isTravelModeActive
-                              ? _buildAnimatedMap()
-                              : _buildTravelModePrompt(),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(AppTheme.spacingM),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _isTravelModeActive
-                                          ? 'Travel Mode Active'
-                                          : 'Enable Travel Mode',
-                                      style: TextStyle(
-                                        color: AppTheme.textPrimary,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _isTravelModeActive
-                                          ? 'Travel protection for $_selectedCountry'
-                                          : 'Secure your account while traveling',
-                                      style: TextStyle(
-                                        color: AppTheme.textSecondary,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              _isActivating
-                                  ? SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          AppTheme.accentNeon,
-                                        ),
-                                      ),
-                                    )
-                                  : Switch(
-                                      value: _isTravelModeActive,
-                                      onChanged: (_) => _toggleTravelMode(),
-                                      activeColor: AppTheme.accentNeon,
-                                      activeTrackColor: AppTheme.accentNeon.withOpacity(0.3),
-                                      inactiveThumbColor: AppTheme.textMuted,
-                                      inactiveTrackColor: AppTheme.backgroundLighter,
-                                    ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                    .animate()
-                    .fadeIn(duration: 800.ms)
-                    .slide(begin: const Offset(0, -0.1), end: Offset.zero, duration: 800.ms),
-                
-                // Travel details
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.spacingM,
-                      vertical: AppTheme.spacingS,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Destination
-                        _buildSectionTitle('Destination'),
-                        NeuroCard(
-                          margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-                          borderRadius: AppTheme.radiusMedium,
-                          padding: const EdgeInsets.all(AppTheme.spacingM),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _selectedCountry,
-                              isExpanded: true,
-                              dropdownColor: AppTheme.backgroundLighter,
-                              style: TextStyle(
-                                color: AppTheme.textPrimary,
-                                fontSize: 16,
-                              ),
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_rounded,
+                ),
+              ],
+              
+              // Main content
+              SafeArea(
+                bottom: true,
+                maintainBottomViewPadding: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // App bar
+                    Padding(
+                      padding: EdgeInsets.all(paddingSize),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: NeuroCard(
+                              width: buttonSize,
+                              height: buttonSize,
+                              borderRadius: AppTheme.radiusRounded,
+                              depth: 3,
+                              padding: const EdgeInsets.all(0),
+                              child: Icon(
+                                Icons.arrow_back_rounded,
                                 color: AppTheme.textSecondary,
+                                size: iconSize,
                               ),
-                              items: _countriesList.map((String country) {
-                                return DropdownMenuItem<String>(
-                                  value: country,
-                                  child: Text(country),
-                                );
-                              }).toList(),
-                              onChanged: _isTravelModeActive
-                                  ? null
-                                  : (String? newValue) {
-                                      if (newValue != null) {
-                                        setState(() {
-                                          _selectedCountry = newValue;
-                                        });
-                                      }
-                                    },
                             ),
                           ),
-                        )
-                            .animate()
-                            .fadeIn(delay: 100.ms, duration: 800.ms)
-                            .slide(begin: const Offset(0.05, 0), end: Offset.zero, delay: 100.ms, duration: 800.ms),
-                        
-                        // Date range
-                        _buildSectionTitle('Travel Dates'),
-                        GestureDetector(
-                          onTap: _isTravelModeActive ? null : _showDateRangePicker,
-                          child: NeuroCard(
-                            margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-                            borderRadius: AppTheme.radiusMedium,
-                            padding: const EdgeInsets.all(AppTheme.spacingM),
-                            child: Row(
+                          SizedBox(width: paddingSize),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.calendar_today_rounded,
-                                  color: _isTravelModeActive
-                                      ? AppTheme.textMuted
-                                      : AppTheme.accentNeon,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: AppTheme.spacingM),
-                                Text(
-                                  _formattedDateRange,
-                                  style: TextStyle(
-                                    color: AppTheme.textPrimary,
-                                    fontSize: 16,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Travel Mode',
+                                    style: TextStyle(
+                                      color: AppTheme.textPrimary,
+                                      fontSize: titleFontSize,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                                const Spacer(),
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  color: _isTravelModeActive
-                                      ? AppTheme.textMuted
-                                      : AppTheme.textSecondary,
-                                  size: 20,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    _isTravelModeActive
+                                        ? 'Active Protection Enabled'
+                                        : 'Currently Inactive',
+                                    style: TextStyle(
+                                      color: _isTravelModeActive
+                                          ? AppTheme.accentNeon
+                                          : AppTheme.textMuted,
+                                      fontSize: smallFontSize,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        )
-                            .animate()
-                            .fadeIn(delay: 200.ms, duration: 800.ms)
-                            .slide(begin: const Offset(0.05, 0), end: Offset.zero, delay: 200.ms, duration: 800.ms),
-                        
-                        // Settings
-                        _buildSectionTitle('Settings'),
-                        
-                        // Auto Currency Exchange
-                        _buildSettingToggle(
-                          title: 'Auto Currency Exchange',
-                          subtitle: 'Automatically use local currency',
-                          icon: Icons.currency_exchange_rounded,
-                          value: _isAutoExchangeEnabled,
-                          onChanged: (value) {
-                            if (!_isTravelModeActive) {
-                              setState(() {
-                                _isAutoExchangeEnabled = value;
-                              });
-                            }
-                          },
-                          delay: 300,
-                        ),
-                        
-                        // Location Tracking
-                        _buildSettingToggle(
-                          title: 'Location Tracking',
-                          subtitle: 'Track spending patterns by location',
-                          icon: Icons.location_on_outlined,
-                          value: _isLocationTrackingEnabled,
-                          onChanged: (value) {
-                            if (!_isTravelModeActive) {
-                              setState(() {
-                                _isLocationTrackingEnabled = value;
-                              });
-                            }
-                          },
-                          delay: 400,
-                        ),
-                        
-                        // Scam Blocking
-                        _buildSettingToggle(
-                          title: 'Enhanced Scam Blocking',
-                          subtitle: 'Extra protection against tourist scams',
-                          icon: Icons.security_rounded,
-                          value: _isScamBlockingEnabled,
-                          onChanged: (value) {
-                            if (!_isTravelModeActive) {
-                              setState(() {
-                                _isScamBlockingEnabled = value;
-                              });
-                            }
-                          },
-                          delay: 500,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                    
+                    // Map visualization & Toggle container
+                    Container(
+                      height: mapContainerHeight,
+                      margin: EdgeInsets.symmetric(
+                        horizontal: paddingSize,
+                        vertical: smallPaddingSize,
+                      ),
+                      child: GlassContainer(
+                        borderRadius: AppTheme.radiusLarge,
+                        opacity: _isTravelModeActive
+                            ? AppTheme.glassOpacityLow
+                            : AppTheme.glassOpacityMedium,
+                        blur: AppTheme.blurStrong,
+                        border: Border.all(
+                          color: _isTravelModeActive
+                              ? AppTheme.accentNeon.withOpacity(0.3)
+                              : Colors.transparent,
+                          width: 1.5,
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: _isTravelModeActive
+                                  ? _buildAnimatedMap(screenWidth, screenHeight)
+                                  : _buildTravelModePrompt(
+                                      screenWidth, 
+                                      iconSize * 2, 
+                                      bodyFontSize, 
+                                      smallFontSize, 
+                                      paddingSize, 
+                                      smallPaddingSize
+                                    ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(paddingSize),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _isTravelModeActive
+                                              ? 'Travel Mode Active'
+                                              : 'Enable Travel Mode',
+                                          style: TextStyle(
+                                            color: AppTheme.textPrimary,
+                                            fontSize: subtitleFontSize,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        SizedBox(height: smallPaddingSize * 0.5),
+                                        Text(
+                                          _isTravelModeActive
+                                              ? 'Travel protection for $_selectedCountry'
+                                              : 'Secure your account while traveling',
+                                          style: TextStyle(
+                                            color: AppTheme.textSecondary,
+                                            fontSize: smallFontSize,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  _isActivating
+                                      ? SizedBox(
+                                          width: buttonSize * 0.5,
+                                          height: buttonSize * 0.5,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              AppTheme.accentNeon,
+                                            ),
+                                          ),
+                                        )
+                                      : Switch(
+                                          value: _isTravelModeActive,
+                                          onChanged: (_) => _toggleTravelMode(),
+                                          activeColor: AppTheme.accentNeon,
+                                          activeTrackColor: AppTheme.accentNeon.withOpacity(0.3),
+                                          inactiveThumbColor: AppTheme.textMuted,
+                                          inactiveTrackColor: AppTheme.backgroundLighter,
+                                        ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    
+                    // Travel details
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: paddingSize,
+                          vertical: smallPaddingSize,
+                        ),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Destination
+                            _buildSectionTitle('Destination', bodyFontSize),
+                            NeuroCard(
+                              margin: EdgeInsets.only(bottom: paddingSize),
+                              borderRadius: AppTheme.radiusMedium,
+                              padding: EdgeInsets.all(paddingSize),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedCountry,
+                                  isExpanded: true,
+                                  dropdownColor: AppTheme.backgroundLighter,
+                                  style: TextStyle(
+                                    color: AppTheme.textPrimary,
+                                    fontSize: bodyFontSize,
+                                  ),
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: AppTheme.textSecondary,
+                                    size: iconSize,
+                                  ),
+                                  items: _countriesList.map((String country) {
+                                    return DropdownMenuItem<String>(
+                                      value: country,
+                                      child: Text(
+                                        country,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: _isTravelModeActive
+                                      ? null
+                                      : (String? newValue) {
+                                          if (newValue != null) {
+                                            setState(() {
+                                              _selectedCountry = newValue;
+                                            });
+                                          }
+                                        },
+                                ),
+                              ),
+                            ),
+                            
+                            // Date range
+                            _buildSectionTitle('Travel Dates', bodyFontSize),
+                            GestureDetector(
+                              onTap: _isTravelModeActive ? null : _showDateRangePicker,
+                              child: NeuroCard(
+                                margin: EdgeInsets.only(bottom: paddingSize),
+                                borderRadius: AppTheme.radiusMedium,
+                                padding: EdgeInsets.all(paddingSize),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today_rounded,
+                                      color: _isTravelModeActive
+                                          ? AppTheme.textMuted
+                                          : AppTheme.accentNeon,
+                                      size: smallIconSize,
+                                    ),
+                                    SizedBox(width: paddingSize),
+                                    Expanded(
+                                      child: Text(
+                                        _formattedDateRange,
+                                        style: TextStyle(
+                                          color: AppTheme.textPrimary,
+                                          fontSize: bodyFontSize,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      color: _isTravelModeActive
+                                          ? AppTheme.textMuted
+                                          : AppTheme.textSecondary,
+                                      size: smallIconSize,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            
+                            // Settings
+                            _buildSectionTitle('Settings', bodyFontSize),
+                            
+                            // Auto Currency Exchange
+                            _buildSettingToggle(
+                              title: 'Auto Currency Exchange',
+                              subtitle: 'Automatically use local currency',
+                              icon: Icons.currency_exchange_rounded,
+                              value: _isAutoExchangeEnabled,
+                              onChanged: (value) {
+                                if (!_isTravelModeActive) {
+                                  setState(() {
+                                    _isAutoExchangeEnabled = value;
+                                  });
+                                }
+                              },
+                              delay: 300,
+                              iconSize: smallIconSize,
+                              padding: paddingSize,
+                              smallPadding: smallPaddingSize,
+                              bodyFontSize: bodyFontSize,
+                              smallFontSize: smallFontSize,
+                            ),
+                            
+                            // Location Tracking
+                            _buildSettingToggle(
+                              title: 'Location Tracking',
+                              subtitle: 'Track spending patterns by location',
+                              icon: Icons.location_on_outlined,
+                              value: _isLocationTrackingEnabled,
+                              onChanged: (value) {
+                                if (!_isTravelModeActive) {
+                                  setState(() {
+                                    _isLocationTrackingEnabled = value;
+                                  });
+                                }
+                              },
+                              delay: 400,
+                              iconSize: smallIconSize,
+                              padding: paddingSize,
+                              smallPadding: smallPaddingSize,
+                              bodyFontSize: bodyFontSize,
+                              smallFontSize: smallFontSize,
+                            ),
+                            
+                            // Scam Blocking
+                            _buildSettingToggle(
+                              title: 'Enhanced Scam Blocking',
+                              subtitle: 'Extra protection against tourist scams',
+                              icon: Icons.security_rounded,
+                              value: _isScamBlockingEnabled,
+                              onChanged: (value) {
+                                if (!_isTravelModeActive) {
+                                  setState(() {
+                                    _isScamBlockingEnabled = value;
+                                  });
+                                }
+                              },
+                              delay: 500,
+                              iconSize: smallIconSize,
+                              padding: paddingSize,
+                              smallPadding: smallPaddingSize,
+                              bodyFontSize: bodyFontSize,
+                              smallFontSize: smallFontSize,
+                            ),
+                            
+                            // Add extra padding at the bottom to avoid cropping
+                            SizedBox(height: paddingSize * 2),
+                          ],
+                        ),
+                      ),
+                    ),
+                    
+                    // Bottom actions
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(paddingSize),
+                      child: FuturisticButton(
+                        text: _isTravelModeActive
+                            ? 'Deactivate Travel Mode'
+                            : 'Activate Travel Mode',
+                        onPressed: _isActivating ? () {} : _toggleTravelMode,
+                        color: _isTravelModeActive
+                            ? AppTheme.dangerNeon
+                            : AppTheme.accentNeon,
+                        isLoading: _isActivating,
+                      ),
+                    )
+                        .animate()
+                        .fadeIn(delay: 600.ms, duration: 800.ms),
+                  ],
                 ),
-                
-                // Bottom actions
-                Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
-                  child: FuturisticButton(
-                    text: _isTravelModeActive
-                        ? 'Deactivate Travel Mode'
-                        : 'Activate Travel Mode',
-                    onPressed: _isActivating ? () {} : _toggleTravelMode,
-                    color: _isTravelModeActive
-                        ? AppTheme.dangerNeon
-                        : AppTheme.accentNeon,
-                    isLoading: _isActivating,
-                  ),
-                )
-                    .animate()
-                    .fadeIn(delay: 600.ms, duration: 800.ms),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        }
       ),
     );
   }
   
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, double fontSize) {
     return Padding(
-      padding: const EdgeInsets.only(
-        top: AppTheme.spacingS,
-        bottom: AppTheme.spacingS,
+      padding: EdgeInsets.only(
+        top: fontSize * 0.5,
+        bottom: fontSize * 0.5,
       ),
       child: Text(
         title,
         style: TextStyle(
           color: AppTheme.textPrimary,
-          fontSize: 16,
+          fontSize: fontSize,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -491,16 +667,27 @@ class _TravelModeScreenState extends State<TravelModeScreen> with SingleTickerPr
     required bool value,
     required void Function(bool) onChanged,
     required int delay,
+    required double iconSize,
+    required double padding,
+    required double smallPadding,
+    required double bodyFontSize,
+    required double smallFontSize,
   }) {
+    // Ensure icon size is never negative
+    final double safeIconSize = max(16.0, iconSize);
+    final double iconContainerSize = max(32.0, safeIconSize * 2.1);
+    
     return NeuroCard(
-      margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+      margin: EdgeInsets.only(bottom: padding),
       borderRadius: AppTheme.radiusMedium,
-      padding: const EdgeInsets.all(AppTheme.spacingM),
+      padding: EdgeInsets.all(padding),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: iconContainerSize,
+            height: iconContainerSize,
             decoration: BoxDecoration(
               color: AppTheme.backgroundLighter,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -510,29 +697,33 @@ class _TravelModeScreenState extends State<TravelModeScreen> with SingleTickerPr
               color: _isTravelModeActive && value
                   ? AppTheme.accentNeon
                   : AppTheme.textMuted,
-              size: 20,
+              size: safeIconSize,
             ),
           ),
-          const SizedBox(width: AppTheme.spacingM),
+          SizedBox(width: padding),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
                   style: TextStyle(
                     color: AppTheme.textPrimary,
-                    fontSize: 16,
+                    fontSize: max(12.0, bodyFontSize),
                     fontWeight: FontWeight.w500,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: max(2.0, smallPadding * 0.25)),
                 Text(
                   subtitle,
                   style: TextStyle(
                     color: AppTheme.textMuted,
-                    fontSize: 12,
+                    fontSize: max(8.0, smallFontSize),
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ],
             ),
@@ -547,48 +738,100 @@ class _TravelModeScreenState extends State<TravelModeScreen> with SingleTickerPr
           ),
         ],
       ),
-    )
-        .animate()
-        .fadeIn(delay: delay.ms, duration: 800.ms)
-        .slide(begin: const Offset(0.05, 0), end: Offset.zero, delay: delay.ms, duration: 800.ms);
-  }
-  
-  Widget _buildTravelModePrompt() {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.spacingM),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.flight_takeoff_rounded,
-            color: AppTheme.accentNeon,
-            size: 48,
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          Text(
-            'Set up Travel Mode for Your Trip',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingXS),
-          Text(
-            'Protect your account and enable location-based features while traveling',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
     );
   }
   
-  Widget _buildAnimatedMap() {
+  Widget _buildTravelModePrompt(
+    double screenWidth, 
+    double iconSize, 
+    double bodyFontSize, 
+    double smallFontSize, 
+    double paddingSize, 
+    double smallPaddingSize
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate available space and adapt layout
+        final double maxHeight = constraints.maxHeight;
+        final double maxWidth = constraints.maxWidth;
+        
+        // Ensure icon size is never negative and scales with available space
+        final double adjustedIconSize = max(24.0, min(iconSize, maxHeight * 0.2));
+        
+        // For very small spaces, use a more compact layout
+        if (maxHeight < 100) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.flight_takeoff_rounded,
+                color: AppTheme.accentNeon,
+                size: adjustedIconSize,
+              ),
+              SizedBox(width: smallPaddingSize),
+              Expanded(
+                child: Text(
+                  'Set up Travel Mode',
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: max(10.0, smallFontSize),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          );
+        }
+        
+        // Normal layout for adequate space
+        return Padding(
+          padding: EdgeInsets.all(paddingSize * 0.5),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.flight_takeoff_rounded,
+                color: AppTheme.accentNeon,
+                size: adjustedIconSize,
+              ),
+              SizedBox(height: smallPaddingSize * 0.5),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'Set up Travel Mode',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: bodyFontSize,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // Only show this if we have enough space
+              if (maxHeight > 130)
+                Flexible(
+                  child: Text(
+                    'Protect your account while traveling',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: max(8.0, smallFontSize),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+          ),
+        );
+      }
+    );
+  }
+  
+  Widget _buildAnimatedMap(double screenWidth, double screenHeight) {
     // This is a simplified map animation
     // In a real app, you'd integrate with a mapping library
     return Stack(
@@ -610,11 +853,11 @@ class _TravelModeScreenState extends State<TravelModeScreen> with SingleTickerPr
         
         // Location indicator
         Positioned(
-          top: 80,
-          left: MediaQuery.of(context).size.width * 0.4,
+          top: screenHeight * 0.1,
+          left: screenWidth * 0.4,
           child: Container(
-            width: 20,
-            height: 20,
+            width: max(8.0, screenWidth * 0.05),
+            height: max(8.0, screenWidth * 0.05),
             decoration: BoxDecoration(
               color: AppTheme.accentNeon,
               shape: BoxShape.circle,
@@ -639,29 +882,34 @@ class _TravelModeScreenState extends State<TravelModeScreen> with SingleTickerPr
         
         // Destination text
         Positioned(
-          top: 70,
-          right: 20,
+          top: screenHeight * 0.08,
+          right: screenWidth * 0.05,
           child: GlassContainer(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.spacingM,
-              vertical: AppTheme.spacingS,
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.04,
+              vertical: screenWidth * 0.02,
             ),
             borderRadius: AppTheme.radiusMedium,
             opacity: 0.1,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.location_on,
                   color: AppTheme.accentNeon,
-                  size: 16,
+                  size: max(12.0, screenWidth * 0.04),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  _selectedCountry,
-                  style: TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                SizedBox(width: screenWidth * 0.01),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: screenWidth * 0.4),
+                  child: Text(
+                    _selectedCountry,
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: max(10.0, screenWidth * 0.035),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
