@@ -277,80 +277,95 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     
                     SizedBox(height: verticalSpacing * 1.5),
                     
-                    // Actions row
-                    Container(
-                      height: screenHeight * 0.11,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                        child: Row(
-                          children: [
-                            _buildQuickAction(
-                              icon: Icons.add_rounded,
-                              label: 'Add Money',
-                              color: AppTheme.primaryNeon,
-                              onTap: () => _navigateToScreen(const AddMoneyScreen()),
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
+                    // Actions row - replaced scrollview with grid
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Quick Actions',
+                            style: TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontSize: screenWidth * 0.04,
+                              fontWeight: FontWeight.bold,
                             ),
-                            _buildQuickAction(
-                              icon: Icons.send_rounded,
-                              label: 'Send',
-                              color: AppTheme.accentNeon,
-                              onTap: () => _navigateToScreen(const SendMoneyScreen()),
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
-                            ),
-                            _buildQuickAction(
-                              icon: Icons.account_balance_wallet,
-                              label: 'Budget',
-                              color: Colors.green,
-                              onTap: () => _navigateToScreen(const BudgetScreen()),
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
-                            ),
-                            _buildQuickAction(
-                              icon: Icons.flash_on_rounded,
-                              label: 'Ghost Pay',
-                              color: AppTheme.secondaryNeon,
-                              onTap: () => _navigateToScreen(const GhostPaymentScreen()),
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
-                            ),
-                            _buildQuickAction(
-                              icon: Icons.credit_card_off_rounded,
-                              label: 'Freeze Card',
-                              color: AppTheme.dangerNeon,
-                              onTap: _toggleCardFreeze,
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
-                            ),
-                            _buildQuickAction(
-                              icon: Icons.group_rounded,
-                              label: 'Group Plan',
-                              color: AppTheme.warningNeon,
-                              onTap: () => _navigateToScreen(const GroupProtectionScreen()),
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
-                            ),
-                            _buildQuickAction(
-                              icon: Icons.travel_explore,
-                              label: 'Travel Mode',
-                              color: AppTheme.accentNeon,
-                              onTap: () => _navigateToScreen(const TravelModeScreen()),
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
-                            ),
-                            _buildQuickAction(
-                              icon: Icons.support_agent,
-                              label: 'Refund Help',
-                              color: AppTheme.primaryNeon,
-                              onTap: () => _navigateToScreen(const RefundAssistantScreen()),
-                              iconSize: screenWidth * 0.07,
-                              cardSize: screenWidth * 0.15,
-                            ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(height: verticalSpacing * 0.8),
+                          
+                          // First row of actions
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildQuickActionCompact(
+                                icon: Icons.add_rounded,
+                                label: 'Add',
+                                color: AppTheme.primaryNeon,
+                                onTap: () => _navigateToScreen(const AddMoneyScreen()),
+                                screenWidth: screenWidth,
+                              ),
+                              _buildQuickActionCompact(
+                                icon: Icons.send_rounded,
+                                label: 'Send',
+                                color: AppTheme.accentNeon,
+                                onTap: () => _navigateToScreen(const SendMoneyScreen()),
+                                screenWidth: screenWidth,
+                              ),
+                              _buildQuickActionCompact(
+                                icon: Icons.account_balance_wallet,
+                                label: 'Budget',
+                                color: Colors.green,
+                                onTap: () => _navigateToScreen(const BudgetScreen()),
+                                screenWidth: screenWidth,
+                              ),
+                              _buildQuickActionCompact(
+                                icon: Icons.flash_on_rounded,
+                                label: 'Ghost',
+                                color: AppTheme.secondaryNeon,
+                                onTap: () => _navigateToScreen(const GhostPaymentScreen()),
+                                screenWidth: screenWidth,
+                              ),
+                            ],
+                          ),
+                          
+                          SizedBox(height: verticalSpacing * 1.2),
+                          
+                          // Second row of actions
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildQuickActionCompact(
+                                icon: Icons.credit_card_off_rounded,
+                                label: 'Freeze',
+                                color: AppTheme.dangerNeon,
+                                onTap: _toggleCardFreeze,
+                                isActive: _isCardFrozen,
+                                screenWidth: screenWidth,
+                              ),
+                              _buildQuickActionCompact(
+                                icon: Icons.group_rounded,
+                                label: 'Group',
+                                color: AppTheme.warningNeon,
+                                onTap: () => _navigateToScreen(const GroupProtectionScreen()),
+                                screenWidth: screenWidth,
+                              ),
+                              _buildQuickActionCompact(
+                                icon: Icons.travel_explore,
+                                label: 'Travel',
+                                color: AppTheme.accentNeon,
+                                onTap: () => _navigateToScreen(const TravelModeScreen()),
+                                screenWidth: screenWidth,
+                              ),
+                              _buildQuickActionCompact(
+                                icon: Icons.support_agent,
+                                label: 'Refund',
+                                color: AppTheme.primaryNeon,
+                                onTap: () => _navigateToScreen(const RefundAssistantScreen()),
+                                screenWidth: screenWidth,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                     
@@ -487,54 +502,45 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildQuickAction({
+  // New compact quick action widget
+  Widget _buildQuickActionCompact({
     required IconData icon,
     required String label,
     required Color color,
     required VoidCallback onTap,
-    required double iconSize,
-    required double cardSize,
+    required double screenWidth,
+    bool isActive = false,
   }) {
-    // Special case for Freeze Card to show active state
-    final bool isActive = label == 'Freeze Card' && _isCardFrozen;
+    final double size = screenWidth * 0.18;
     
-    return Container(
-      margin: EdgeInsets.only(right: cardSize * 0.3),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          NeuroCard(
-            width: cardSize,
-            height: cardSize,
-            borderRadius: AppTheme.radiusMedium,
-            depth: 4,
-            onTap: onTap,
-            padding: const EdgeInsets.all(0),
-            glow: isActive ? color : null,
-            child: Icon(
-              icon,
-              color: isActive ? Colors.white : color,
-              size: iconSize,
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        NeuroCard(
+          width: size,
+          height: size,
+          borderRadius: AppTheme.radiusMedium,
+          depth: 3,
+          onTap: onTap,
+          padding: const EdgeInsets.all(0),
+          glow: isActive ? color : null,
+          child: Icon(
+            icon,
+            color: isActive ? Colors.white : color,
+            size: size * 0.45,
           ),
-          SizedBox(height: cardSize * 0.1),
-          Container(
-            width: cardSize * 1.2,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: isActive ? color : AppTheme.textSecondary,
-                  fontSize: cardSize * 0.2,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
+        ),
+        SizedBox(height: 6),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: isActive ? color : AppTheme.textSecondary,
+            fontSize: 12,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
