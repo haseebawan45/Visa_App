@@ -10,6 +10,8 @@ import 'package:visa_app/screens/ghost_payment_screen.dart';
 import 'package:visa_app/screens/refund_assistant_screen.dart';
 import 'package:visa_app/screens/group_protection_screen.dart';
 import 'package:visa_app/screens/travel_mode_screen.dart';
+import 'package:visa_app/screens/add_money_screen.dart';
+import 'package:visa_app/screens/send_money_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -259,13 +261,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         icon: Icons.add_rounded,
                         label: 'Add Money',
                         color: AppTheme.primaryNeon,
-                        onTap: () {},
+                        onTap: () => _navigateToScreen(const AddMoneyScreen()),
                       ),
                       _buildQuickAction(
                         icon: Icons.send_rounded,
                         label: 'Send',
                         color: AppTheme.accentNeon,
-                        onTap: () {},
+                        onTap: () => _navigateToScreen(const SendMoneyScreen()),
                       ),
                       _buildQuickAction(
                         icon: Icons.flash_on_rounded,
