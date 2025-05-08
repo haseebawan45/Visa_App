@@ -12,6 +12,7 @@ import 'package:visa_app/screens/group_protection_screen.dart';
 import 'package:visa_app/screens/travel_mode_screen.dart';
 import 'package:visa_app/screens/add_money_screen.dart';
 import 'package:visa_app/screens/send_money_screen.dart';
+import 'package:visa_app/screens/budget_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -296,6 +297,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               label: 'Send',
                               color: AppTheme.accentNeon,
                               onTap: () => _navigateToScreen(const SendMoneyScreen()),
+                              iconSize: screenWidth * 0.07,
+                              cardSize: screenWidth * 0.15,
+                            ),
+                            _buildQuickAction(
+                              icon: Icons.account_balance_wallet,
+                              label: 'Budget',
+                              color: Colors.green,
+                              onTap: () => _navigateToScreen(const BudgetScreen()),
                               iconSize: screenWidth * 0.07,
                               cardSize: screenWidth * 0.15,
                             ),
