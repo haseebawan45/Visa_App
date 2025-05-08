@@ -13,6 +13,7 @@ import 'package:visa_app/screens/travel_mode_screen.dart';
 import 'package:visa_app/screens/add_money_screen.dart';
 import 'package:visa_app/screens/send_money_screen.dart';
 import 'package:visa_app/screens/budget_screen.dart';
+import 'package:visa_app/screens/transaction_history_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -373,7 +374,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () => _navigateToScreen(const TransactionHistoryScreen()),
                             child: Row(
                               children: [
                                 Text(

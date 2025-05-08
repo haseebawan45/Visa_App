@@ -102,8 +102,8 @@ class Transaction {
     }
   }
 
-  static List<Transaction> getMockTransactions() {
-    return [
+  static List<Transaction> getMockTransactions({int count = 6}) {
+    final List<Transaction> baseTransactions = [
       Transaction(
         id: '1',
         title: 'Salary Deposit',
@@ -167,5 +167,102 @@ class Transaction {
         categoryName: 'Travel',
       ),
     ];
+    
+    // If we need exactly the base amount, return them
+    if (count <= baseTransactions.length) {
+      return baseTransactions.sublist(0, count);
+    }
+    
+    // Otherwise, generate additional transactions
+    final List<Transaction> result = List.from(baseTransactions);
+    final List<String> titles = [
+      'Coffee Shop',
+      'Fuel Station',
+      'Online Shopping',
+      'Mobile Recharge',
+      'Electricity Bill',
+      'Internet Bill',
+      'Clothing Store',
+      'Restaurant Payment',
+      'Movie Tickets',
+      'Ride Sharing',
+      'Subscription Payment',
+      'Money Transfer',
+      'ATM Withdrawal',
+      'Medical Expenses',
+      'Hardware Store',
+      'Book Store',
+      'Home Appliances',
+      'Phone Bill'
+    ];
+    
+    final List<String> descriptions = [
+      'Daily coffee',
+      'Vehicle refueling',
+      'Purchased items online',
+      'Monthly mobile balance',
+      'Monthly electricity payment',
+      'Internet service payment',
+      'Seasonal shopping',
+      'Dining out',
+      'Weekend entertainment',
+      'Transportation',
+      'Monthly subscription',
+      'Sent money to friend',
+      'Cash withdrawal',
+      'Healthcare expenses',
+      'Home repairs',
+      'Educational materials',
+      'Home improvement',
+      'Phone service'
+    ];
+    
+    final List<TransactionType> types = [
+      TransactionType.withdrawal,
+      TransactionType.transfer,
+      TransactionType.ghostPayment,
+      TransactionType.refund,
+    ];
+    
+    final List<TransactionStatus> statuses = [
+      TransactionStatus.completed,
+      TransactionStatus.completed, // More likely to be completed
+      TransactionStatus.completed,
+      TransactionStatus.completed,
+      TransactionStatus.pending,
+      TransactionStatus.failed,
+      TransactionStatus.flagged,
+    ];
+    
+    // Generate additional random transactions
+    for (int i = baseTransactions.length; i < count; i++) {
+      final titleIndex = i % titles.length;
+      final typeIndex = i % types.length;
+      final statusIndex = i % statuses.length;
+      
+      // Generate a random amount between 500 and 50000
+      final amount = 500 + (49500 * (i / count));
+      
+      // Create a date in the past (up to 30 days ago)
+      final daysAgo = (i / 3).round() + 1; // Distribute over the past month
+      final date = DateTime.now().subtract(Duration(days: daysAgo));
+      
+      result.add(Transaction(
+        id: (i + 1).toString(),
+        title: titles[titleIndex],
+        description: descriptions[titleIndex],
+        amount: amount,
+        date: date,
+        type: types[typeIndex],
+        status: statuses[statusIndex],
+        merchantName: 'Merchant ${i + 1}',
+        categoryName: types[typeIndex].toString().split('.').last.toUpperCase(),
+      ));
+    }
+    
+    // Sort by date (newest first)
+    result.sort((a, b) => b.date.compareTo(a.date));
+    
+    return result;
   }
 } 
