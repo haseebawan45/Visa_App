@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'NeuPay',
+      title: 'BEE NETWORK',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme(),
       home: const OnboardingScreen(),

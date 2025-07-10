@@ -201,9 +201,9 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
 
   void _handleInterruption(String message) {
     // First acknowledge the interruption
-    _addMessage(
+        _addMessage(
       "I understand you want to switch topics. What would you like to do instead?",
-      ChatMessageType.assistant,
+          ChatMessageType.assistant,
       suggestions: [
         "Request a refund",
         "Track my refund status",
@@ -234,17 +234,17 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
     
     if (isFirstInteraction) {
       _conversationContext["greeting_count"] = 1;
-      _addMessage(
+        _addMessage(
         "Hello! It's nice to meet you. I'm your Refund Assistant. How can I help you today?",
-        ChatMessageType.assistant,
+          ChatMessageType.assistant,
         suggestions: [
           "Request a refund",
           "Track my refund status",
           "Dispute a transaction",
           "Contact merchant"
         ],
-      );
-    } else {
+        );
+      } else {
       // Increment greeting count
       _conversationContext["greeting_count"] = (_conversationContext["greeting_count"] as int) + 1;
       
@@ -366,10 +366,10 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
     } else if (intent == "help") {
       _showHelpOptions();
     } else {
-      _addMessage(
+        _addMessage(
         "I'll be happy to assist you with that. What would you like to do?",
-        ChatMessageType.assistant,
-        suggestions: [
+          ChatMessageType.assistant,
+          suggestions: [
           "Request a refund",
           "Track my refund status",
           "Dispute a transaction",
@@ -380,16 +380,16 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
   }
 
   void _showHelpOptions() {
-    _addMessage(
+        _addMessage(
       "I'm here to help! Here are the main things I can assist you with:",
-      ChatMessageType.assistant,
-    );
-    
-    Future.delayed(const Duration(milliseconds: 500), () {
-      _addMessage(
+          ChatMessageType.assistant,
+        );
+        
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _addMessage(
         "• Request a refund for a purchase\n• Track the status of existing refunds\n• Dispute a transaction you don't recognize\n• Get contact information for merchants\n\nWhat would you like help with today?",
-        ChatMessageType.assistant,
-        suggestions: [
+            ChatMessageType.assistant,
+            suggestions: [
           "Request a refund",
           "Track my refund status",
           "Dispute a transaction",
@@ -402,30 +402,30 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
             actionType: "view_tutorial",
             parameters: {"topic": "refunds"},
           ),
-        ],
-      );
-    });
+            ],
+          );
+        });
   }
 
   // Additional method for handling tutorial requests
   void _showTutorial(String topic) {
     if (topic == "refunds") {
-      _addMessage(
-        "Refund Process Tutorial",
-        ChatMessageType.assistant,
-      );
-      
-      Future.delayed(const Duration(milliseconds: 500), () {
         _addMessage(
-          "The refund process works in 4 simple steps:\n\n1️⃣ Request: You provide transaction details and reason\n2️⃣ Submission: We send the request to the merchant\n3️⃣ Processing: The merchant reviews your request (typically 3-5 business days)\n4️⃣ Resolution: Approved refunds are credited back to your original payment method\n\nWould you like to start a refund request now?",
+        "Refund Process Tutorial",
           ChatMessageType.assistant,
-          suggestions: [
+        );
+        
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _addMessage(
+          "The refund process works in 4 simple steps:\n\n1️⃣ Request: You provide transaction details and reason\n2️⃣ Submission: We send the request to the merchant\n3️⃣ Processing: The merchant reviews your request (typically 3-5 business days)\n4️⃣ Resolution: Approved refunds are credited back to your original payment method\n\nWould you like to start a refund request now?",
+            ChatMessageType.assistant,
+            suggestions: [
             "Yes, request a refund",
             "No, maybe later",
             "Show me another tutorial"
-          ],
-        );
-      });
+            ],
+          );
+        });
     } else if (topic == "disputes") {
       // Add dispute tutorial content...
     }
@@ -594,14 +594,14 @@ class _RefundAssistantScreenState extends State<RefundAssistantScreen> {
 
   void _showMerchantContactOptions() {
         _addMessage(
-      "I can help you contact the merchant directly. Which merchant would you like to contact?",
+          "I can help you contact the merchant directly. Which merchant would you like to contact?",
           ChatMessageType.assistant,
-      suggestions: [
-        "Coffee Shop",
-        "Online Store",
-        "Grocery Store",
-        "Other merchant"
-      ],
+          suggestions: [
+            "Coffee Shop",
+            "Online Store",
+            "Grocery Store",
+            "Other merchant"
+          ],
       actions: [
         ChatAction(
           label: "View recent merchants",

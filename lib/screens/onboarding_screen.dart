@@ -132,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       const SizedBox(width: AppTheme.spacingS),
                       Text(
-                        "NEUPAY",
+                        "BEE NETWORK",
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,

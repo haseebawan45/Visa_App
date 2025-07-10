@@ -167,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Asad Khan',
+                                'Haseeb Tariq',
                                 style: TextStyle(
                                   color: AppTheme.textPrimary,
                                   fontSize: 22,
@@ -176,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'asad.khan@gmail.com',
+                                'haseebawanop@gmail.com',
                                 style: TextStyle(
                                   color: AppTheme.textSecondary,
                                   fontSize: 14,
@@ -354,7 +354,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                         ),
                         _buildSettingItem(
-                          title: 'About NEUPAY',
+                          title: 'About BEE NETWORK',
                           subtitle: 'App version, legal info, and more',
                           icon: Icons.info_outline,
                           color: AppTheme.textMuted,

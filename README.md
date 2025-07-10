@@ -1,4 +1,4 @@
-# NeuPay - Futuristic Payment App UI Design
+# BEE NETWORK - Futuristic Payment App UI Design
 
 A visually stunning Flutter app UI for a futuristic payment app concept designed for Pakistan. This project is a UI-only implementation focusing on modern design aesthetics.
 
